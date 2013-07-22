@@ -1,0 +1,114 @@
+module Representation
+  describe Attribute do
+    describe "#initialize" do
+      describe "#name" do
+        it "is set from options key" do
+          options = { id: { type: UUID } }
+          Attribute.new(options).name.should == :id
+        end
+      end
+
+      describe "#type" do
+        it "is set from options" do
+          type = Integer
+          attribute = Attribute.new({ type: type })
+          attribute.type.should == type
+        end
+
+        it "is set from name hash" do
+          type = String
+          attribute = Attribute.new({ id: { type: UUID } })
+          attribute.type.should == UUID
+        end
+
+        it "determines type from string" do
+          Attribute.new({ type: "string" }).type.should == String
+        end
+      end
+
+      describe "#schema" do
+        it "is set to nil if its a regular attribute" do
+          Attribute.new({ id: { type: UUID } }).schema.should == nil
+        end
+
+        it "is initiazed from options" do
+          options = {
+            film: {
+              type: Object,
+              attributes: {
+                year: { type: Integer }
+              }
+            }
+          }
+
+          schema = Attribute.new(options).schema
+          schema.title.should == :film
+          schema.type.should == Object
+          attributes = schema.attributes
+          attributes.size.should == 1
+          attribute = attributes.first
+          attribute.name.should == :year
+          attribute.type.should == Integer
+        end
+      end
+    end
+
+    describe "#to_hash" do
+      it "converts attributes to hashes" do
+        attributes = { foo: { type: String } }
+        attribute = Attribute.new(attributes)
+        attribute.to_hash.should == { foo: nil }
+      end
+
+      it "converts attributes to hashes with values" do
+        attributes = { foo: { type: String } }
+        attribute = Attribute.new(attributes)
+        attribute.to_hash("bar").should == { foo: "bar" }
+      end
+
+      it "converts schema values to hashes" do
+        schema_name = "foo"
+        attributes = {
+          schema_name => {
+            type: Object,
+            attributes: {
+              attribute: { type: String }
+            }
+          }
+        }
+
+        value = "baz"
+        data = { attribute: value }
+
+        attribute = Attribute.new(attributes)
+        attribute.to_hash(data).should == { foo: { :attribute => value } }
+      end
+    end
+
+    describe "#value" do
+      context "offline mode" do
+        before(:all) do
+          @original_live = Representation.live
+          Representation.live = false
+        end
+
+        after(:all) do
+          Representation.live = @original_live
+        end
+
+        it "generate value based on type" do
+          supported_classes = [
+            String,
+            Integer
+          ]
+
+          supported_classes.each do |klass|
+            Attribute.new({ type: klass }).default_value.should be_a(klass)
+          end
+          UUID.validate(Attribute.new({ type: UUID }).default_value).should be_true
+        end
+      end
+    end
+
+  end
+end

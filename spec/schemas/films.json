@@ -1,0 +1,13 @@
+{
+  "title": "films",
+  "type": "array",
+  "elements": {
+    "title": "film",
+    "type" : "object",
+    "attributes" : {
+      "id" : {
+        "type": "uuid"
+      }
+    }
+  }
+}

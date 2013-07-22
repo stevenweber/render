@@ -1,0 +1,8 @@
+{
+  "title": "film",
+  "type": "object",
+  "attributes": {
+    "name": { "type": "string" },
+    "year": { "type": "integer" }
+  }
+}
