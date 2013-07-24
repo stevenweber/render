@@ -4,13 +4,15 @@
 #  - Add nested Graphs by interpreting/sending data they need
 
 require "representation/graph"
+require "representation/generator"
 
 module Representation
   @live = true
   @schemas = {}
+  @generators = []
 
   class << self
-    attr_accessor :live, :schemas
+    attr_accessor :live, :schemas, :generators
 
     def load_schemas!(directory)
       Dir.glob("#{directory}/**/*.json").each do |schema_file|

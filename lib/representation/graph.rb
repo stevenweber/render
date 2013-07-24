@@ -54,13 +54,13 @@ module Representation
       uri.to_s
     end
 
-    # TODO #pull should be threaded
     def pull(inherited_attributes = {})
       calculate_parental_params!(inherited_attributes)
       graph_attributes = schema.pull(inherited_attributes.merge(parental_params.merge({ endpoint: endpoint })))
 
       graphs.inject(graph_attributes) do |attributes, nested_graph|
         threads = []
+        # TODO threading should be configured so people may also think about Thread.abort_on_transaction!
         threads << Thread.new do
           title = schema.title.to_sym
           parent_data = attributes[title]

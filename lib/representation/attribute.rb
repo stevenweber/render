@@ -1,20 +1,5 @@
 # An Attribute represents a specific key and value as part of a Schema.
 # It is responsible for casting its value and generating sample (default) data when not in live-mode.
-# TODO
-# Arrays should really be represented by these two ways:
-# { title: "beer_ids", type: Array, elements: { type: UUID } }
-# { title: "beers", type: Array, elements: { type: Object, attributes: { name: { type: String } } } }
-# ...or should we just standardize on attributes to be simpler? eh, I'd rather be clearer
-# TODO
-# Custom generators should be defined on Representation, which #faux_value can leverage with its name. e.g.
-# Representation.generators = [
-#   Generator.new({
-#     type: String,
-#     qualifiers: %w(name, first_name, last_name),
-#     algorithm: lambda { Faker::Name.name }
-#   })
-# ]
-# sudo #faux_value: Representation.generator(String, "name").call
 
 require "uuid"
 
@@ -92,12 +77,21 @@ module Representation
     def faux_value
       # TODO implement better #faux_value
       return enums.sample if enums
+      return generator_value if generator_value # todo optimize generator_value call
+
       case(type.name)
       when("String") then "A String"
-      when("Integer") then 1
+      when("Integer") then rand(1000)
       when("UUID") then UUID.generate
       when("Boolean") then [true, false].sample
       end
+    end
+
+    def generator_value
+      generator = Representation.generators.detect do |generator|
+        generator.type == type && name.match(generator.matcher)
+      end
+      generator.algorithm.call if generator
     end
 
   end

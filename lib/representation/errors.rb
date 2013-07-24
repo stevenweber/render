@@ -1,5 +1,19 @@
 module Representation
   module Errors
+    class Generator
+      class MalformedAlgorithm < StandardError
+        attr_accessor :algorithm
+
+        def initialize(algorithm)
+          self.algorithm = algorithm
+        end
+
+        def to_s
+          "Algorithms must respond to #call, which #{algorithm.inspect} does not."
+        end
+      end
+    end
+
     class Graph
       class EndpointKeyNotFound < StandardError
         attr_accessor :config_key

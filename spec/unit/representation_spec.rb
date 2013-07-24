@@ -26,6 +26,21 @@ describe Representation do
       end
     end
 
+    describe ".generators" do
+      before(:each) do
+        @original_value = Representation.generators
+        Representation.generators.clear
+      end
+
+      after(:each) do
+        Representation.generators = @original_value
+      end
+
+      it "defaults to an empty array" do
+        Representation.generators.should == []
+      end
+    end
+
     describe ".load_schemas!" do
       before(:each) do
         @schema_title = "film"
