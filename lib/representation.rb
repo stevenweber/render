@@ -28,6 +28,7 @@ module Representation
     def parse_type(type)
       if type.is_a?(String)
         return UUID if type == "uuid"
+        return Boolean if type == "boolean"
         Object.const_get(type.capitalize) # TODO better type parsing
       else
         type

@@ -20,7 +20,7 @@ require "uuid"
 
 module Representation
   class Attribute
-    attr_accessor :name, :type, :schema, :archetype
+    attr_accessor :name, :type, :schema, :archetype, :enums
 
     # Initialize take a few different Hashes
     # { name: { type: UUID } } for standard Hashes to be aligned
@@ -28,16 +28,18 @@ module Representation
     # { name: { type: Object, attributes { ... } } for nested schemas
     def initialize(options = {})
       self.name = options.keys.first
-      if (options.keys.first == :type)
+      if (options.keys.first == :type && !options[options.keys.first].is_a?(Hash)) # todo there has to be a better way to do this
         initialize_as_archetype(options)
       else
         self.type = Representation.parse_type(options[name][:type])
+        self.enums = options[name][:enum]
         initialize_schema!(options) if schema_value?(options)
       end
     end
 
     def initialize_as_archetype(options)
       self.type = Representation.parse_type(options[:type])
+      self.enums = options[:enum]
       self.archetype = true
     end
 
@@ -89,12 +91,12 @@ module Representation
 
     def faux_value
       # TODO implement better #faux_value
+      return enums.sample if enums
       case(type.name)
       when("String") then "A String"
       when("Integer") then 1
-      when("Boolean") then true
-      when("Array") then []
       when("UUID") then UUID.generate
+      when("Boolean") then [true, false].sample
       end
     end
 

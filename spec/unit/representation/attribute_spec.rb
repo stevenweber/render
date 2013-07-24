@@ -51,6 +51,14 @@ module Representation
           attribute.type.should == Integer
         end
       end
+
+      context "enums" do
+        it "sets enum values" do
+          enum_values = ["foo", "bar", "baz"]
+          attribute = Attribute.new({ type: String, enum: enum_values })
+          attribute.enums.should == enum_values
+        end
+      end
     end
 
     describe "#to_hash" do
@@ -106,6 +114,12 @@ module Representation
             Attribute.new({ type: klass }).default_value.should be_a(klass)
           end
           UUID.validate(Attribute.new({ type: UUID }).default_value).should be_true
+        end
+
+        it "generates value from enum" do
+          enums = ["horror", "comedy", "drama"]
+          attribute = Attribute.new({ genre: { enum: enums, type: String } })
+          enums.should include(attribute.default_value)
         end
       end
     end
