@@ -46,7 +46,8 @@ module Representation
     end
 
     def serialize(data)
-      data.is_a?(Array) ? to_array(data) : to_hash(data)
+      # data.is_a?(Array) ? to_array(data) : to_hash(data)
+      (type == Array) ? to_array(data) : to_hash(data)
     end
 
     private
@@ -74,10 +75,12 @@ module Representation
     end
 
     def to_array(elements)
-      elements.first.is_a?(Hash) ? to_array_of_schemas(elements) : to_array_of_elements(elements)
+      # elements.first.is_a?(Hash) ? to_array_of_schemas(elements) : to_array_of_elements(elements)
+      attributes.first.schema_value? ? to_array_of_schemas(elements) : to_array_of_elements(elements)
     end
 
     def to_array_of_elements(elements)
+      (elements = stubbed_array) if !Representation.live && !elements
       archetype = attributes.first # there should only be one in the event that it's an array schema
       elements.collect do |element|
         archetype.serialize(element)
@@ -85,6 +88,7 @@ module Representation
     end
 
     def to_array_of_schemas(elements)
+      (elements = stubbed_array) if !Representation.live && !elements
       elements.collect do |element|
         attributes.inject({}) do |attributes, attribute|
           attributes.merge(attribute.to_hash(element)).values.first
@@ -93,6 +97,7 @@ module Representation
     end
 
     def to_hash(explicit_values = {})
+      explicit_values ||= {} # !Representation.live check
       attributes.inject({}) do |accum, attribute|
         explicit_value = explicit_values[attribute.name]
         hash = attribute.to_hash(explicit_value)
@@ -100,5 +105,10 @@ module Representation
       end
     end
 
+    def stubbed_array
+      elements = []
+      rand(1..3).times { elements << nil }
+      elements
+    end
   end
 end

@@ -60,18 +60,22 @@ module Representation
       graph_attributes = schema.pull(inherited_attributes.merge(parental_params.merge({ endpoint: endpoint })))
 
       graphs.inject(graph_attributes) do |attributes, nested_graph|
-        title = schema.title.to_sym
-        parent_data = attributes[title]
-        nested_graph_data = if parent_data.is_a?(Array)
-          data = parent_data.collect do |element|
-            nested_graph.pull(element)
+        threads = []
+        threads << Thread.new do
+          title = schema.title.to_sym
+          parent_data = attributes[title]
+          nested_graph_data = if parent_data.is_a?(Array)
+            data = parent_data.collect do |element|
+              nested_graph.pull(element)
+            end
+            key = data.first.keys.first
+            attributes[title] = data.collect { |d| d[key] }
+          else
+            data = nested_graph.pull(parent_data)
+            parent_data.merge!(data)
           end
-          key = data.first.keys.first
-          attributes[title] = data.collect { |d| d[key] }
-        else
-          data = nested_graph.pull(parent_data)
-          parent_data.merge!(data)
         end
+        threads.collect(&:join)
         attributes
       end
     end
@@ -85,7 +89,7 @@ module Representation
     end
 
     def calculate_parental_params!(inherited)
-      self.parental_params = relationships.inject({}) do |attributes, (parent_key, child_key)|
+      self.parental_params = relationships.inject(inherited) do |attributes, (parent_key, child_key)|
         attributes.merge({ child_key => inherited[parent_key] })
       end
     end

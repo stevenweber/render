@@ -27,10 +27,10 @@ module Representation
     # { type: UUID } for elements in an array to be parsed
     # { name: { type: Object, attributes { ... } } for nested schemas
     def initialize(options = {})
+      self.name = options.keys.first
       if (options.keys.first == :type)
         initialize_as_archetype(options)
       else
-        self.name = options.keys.first
         self.type = Representation.parse_type(options[name][:type])
         initialize_schema!(options) if schema_value?(options)
       end
@@ -80,12 +80,12 @@ module Representation
       Representation.live ? nil : faux_value
     end
 
-    private
-
     def schema_value?(options = {})
       return true if schema
       options[name].is_a?(Hash) && (options[name][:attributes] || options[name][:elements])
     end
+
+    private
 
     def faux_value
       # TODO implement better #faux_value
