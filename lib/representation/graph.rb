@@ -76,7 +76,7 @@ module Representation
           end
         end
         threads.collect(&:join)
-        attributes
+        DottableHash.new(attributes)
       end
     end
 
