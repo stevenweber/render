@@ -13,24 +13,4 @@
       item.recursive_stringify_keys! if item.respond_to?(:recursive_stringify_keys!)
     end
   end
-
-  def hardcode(enumerable)
-    dup.hardcode!(enumerable)
-  end
-
-  def hardcode!(enumerable)
-    if self.empty? && enumerable.any?
-      enumerable
-    else
-      each_with_index do |a, index|
-        if a.is_a?(Hash)
-          self[index] = a.hardcode(enumerable[index]) if enumerable[index]
-        elsif a.is_a?(Enumerable)
-          self[index] = a.collect { |v| a.hardcode(enumerable[index]) }
-        else
-          self[index] = enumerable[index] if enumerable[index]
-        end
-      end
-    end
-  end
 end

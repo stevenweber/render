@@ -36,17 +36,4 @@ class ::Hash
   def symbolize_keys
     dup.symbolize_keys!
   end
-
-  def hardcode(other_hash)
-    dup.hardcode!(other_hash)
-  end
-
-  def hardcode!(other_hash)
-    other_hash.each_pair do |k,v|
-      tv = self[k]
-      self[k] = tv.respond_to?(:hardcode) && v.respond_to?(:hardcode) ? tv.hardcode(v) : v
-    end
-    self
-  end
-
 end

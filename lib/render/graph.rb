@@ -6,6 +6,7 @@
 
 require "render/schema"
 require "render/errors"
+require "render/dottable_hash"
 
 module Render
   class Graph
@@ -58,7 +59,7 @@ module Render
       calculate_parental_params!(inherited_attributes)
       graph_attributes = schema.render(inherited_attributes.merge(parental_params.merge({ endpoint: endpoint })))
 
-      graphs.inject(graph_attributes) do |attributes, nested_graph|
+      graph = graphs.inject(graph_attributes) do |attributes, nested_graph|
         threads = []
         # TODO threading should be configured so people may also think about Thread.abort_on_transaction!
         threads << Thread.new do
@@ -76,8 +77,9 @@ module Render
           end
         end
         threads.collect(&:join)
-        DottableHash.new(attributes)
+        attributes
       end
+      DottableHash.new(graph)
     end
 
     private

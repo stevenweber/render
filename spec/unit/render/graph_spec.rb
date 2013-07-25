@@ -123,13 +123,21 @@ module Render
       end
     end
 
-    describe ".render" do
+    describe "#render" do
       it "returns its schema's data" do
         pull = { film: { id: UUID.generate } }
-        @schema.stub({ pull: pull })
+        @schema.stub({ render: pull })
 
         graph = Graph.new(@schema)
         graph.render.should == pull
+      end
+
+      it "returns a dottable hash" do
+        pull = { film: { id: UUID.generate } }
+        @schema.stub({ render: pull })
+
+        graph = Graph.new(@schema)
+        graph.render.should be_a(DottableHash)
       end
 
       it "sends interpolated endpoint to its schema" do
@@ -137,8 +145,9 @@ module Render
         client_id = UUID.generate
         graph = Graph.new(@schema, { endpoint: endpoint, client_id: client_id })
 
-        @schema.should_receive(:pull).with({ endpoint: graph.endpoint }).and_return(@pull)
-        graph.render.should == @pull
+        pull = { foo: "bar" }
+        @schema.should_receive(:render).with({ endpoint: graph.endpoint }).and_return(pull)
+        graph.render.should == pull
       end
 
       context "with nested graphs" do
@@ -162,7 +171,7 @@ module Render
 
         it "merges nested graphs" do
           pulled_data = { a: "attribute" }
-          @director_schema.stub({ pull: pulled_data })
+          @director_schema.stub({ render: pulled_data })
 
           director = Graph.new(@director_schema)
           film = Graph.new(@film_schema, { graphs: [director]})
@@ -174,7 +183,7 @@ module Render
         it "uses parent data to calculate endpoint" do
           director_id = UUID.generate
           film = Graph.new(@film_schema)
-          film.schema.stub({ pull: { film: { director_id: director_id } } })
+          film.schema.stub({ render: { film: { director_id: director_id } } })
 
           endpoint = "http://endpoint.local/directors/:id"
           interpolated_endpoint = "http://endpoint.local/directors/#{director_id}"
@@ -182,7 +191,7 @@ module Render
           director = Graph.new(@director_schema, { endpoint: endpoint, relationships: relationships })
 
           film.graphs << director
-          director.schema.should_receive(:pull).with do |args|
+          director.schema.should_receive(:render).with do |args|
             args[:endpoint].should == interpolated_endpoint
           end.and_return({})
 
