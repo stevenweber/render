@@ -156,7 +156,7 @@ module Render
           stub_request(:get, endpoint).to_return(response)
 
           film = Schema.new(@film_schema)
-          film.pull({ endpoint: endpoint }).should == response_body
+          film.render({ endpoint: endpoint }).should == response_body
         end
 
         it "raises error if response is not 2xx" do
@@ -166,7 +166,7 @@ module Render
 
           expect {
             film = Schema.new(@film_schema)
-            film.pull({ endpoint: endpoint })
+            film.render({ endpoint: endpoint })
           }.to raise_error(Errors::Schema::RequestError)
         end
 
@@ -175,7 +175,7 @@ module Render
           stub_request(:get, endpoint).to_return({ body: "Server Error: 500" })
 
           expect {
-            Schema.new(@film_schema).pull({ endpoint: endpoint })
+            Schema.new(@film_schema).render({ endpoint: endpoint })
           }.to raise_error(Errors::Schema::InvalidResponse)
         end
       end
@@ -187,7 +187,7 @@ module Render
 
         it "returns schema with fake values" do
           film = Schema.new(@film_schema)
-          film = film.pull[:film]
+          film = film.render[:film]
           film[:name].should be_a(String)
           film[:genre].should be_a(String)
         end
@@ -200,7 +200,7 @@ module Render
         stub_request(:get, endpoint).to_return(response)
 
         film = Schema.new(@film_schema)
-        film.pull({ endpoint: endpoint }).should == { film: response_body }
+        film.render({ endpoint: endpoint }).should == { film: response_body }
       end
 
       it "handles Array responses" do
@@ -217,7 +217,7 @@ module Render
         stub_request(:get, endpoint).to_return(response)
 
         film = Schema.new(@films_schema)
-        film.pull({ endpoint: endpoint }).should == { films: response_body }
+        film.render({ endpoint: endpoint }).should == { films: response_body }
       end
     end
 

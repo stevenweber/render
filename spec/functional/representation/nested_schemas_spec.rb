@@ -32,7 +32,7 @@ module Render
         }
       }
 
-      Schema.new(schema).pull(data).should == {
+      Schema.new(schema).render(data).should == {
         person: {
           contact: {
             name: contact_name,
@@ -82,7 +82,7 @@ module Render
       }
       people = [zissou, ned]
 
-      Schema.new(schema).pull(people).should == {
+      Schema.new(schema).render(people).should == {
         people: [{
             name: "Steve Zissou",
             nicknames: [

@@ -39,7 +39,7 @@ module Render
       definition.keys.include?(:attributes)
     end
 
-    def pull(options = {})
+    def render(options = {})
       endpoint = options.delete(:endpoint)
       data = Render.live ? request(endpoint) : options
       { title.to_sym => serialize(data) }

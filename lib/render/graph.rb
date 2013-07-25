@@ -54,9 +54,9 @@ module Render
       uri.to_s
     end
 
-    def pull(inherited_attributes = {})
+    def render(inherited_attributes = {})
       calculate_parental_params!(inherited_attributes)
-      graph_attributes = schema.pull(inherited_attributes.merge(parental_params.merge({ endpoint: endpoint })))
+      graph_attributes = schema.render(inherited_attributes.merge(parental_params.merge({ endpoint: endpoint })))
 
       graphs.inject(graph_attributes) do |attributes, nested_graph|
         threads = []
@@ -66,12 +66,12 @@ module Render
           parent_data = attributes[title]
           nested_graph_data = if parent_data.is_a?(Array)
             data = parent_data.collect do |element|
-              nested_graph.pull(element)
+              nested_graph.render(element)
             end
             key = data.first.keys.first
             attributes[title] = data.collect { |d| d[key] }
           else
-            data = nested_graph.pull(parent_data)
+            data = nested_graph.render(parent_data)
             parent_data.merge!(data)
           end
         end

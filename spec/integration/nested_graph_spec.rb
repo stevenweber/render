@@ -33,7 +33,7 @@ describe Render do
         endpoint: @films_endpoint
       }
       graph = Render::Graph.new(:films, options)
-      graph.pull.should == {
+      graph.render.should == {
         films: [
           { name: aquatic_name, year: nil },
           { name: darjeeling_name, year: nil }
@@ -70,7 +70,7 @@ describe Render do
 
       films = Representation::Graph.new(films, { endpoint: @films_endpoint })
       films.graphs << Representation::Graph.new(film, { endpoint: @film_endpoint, relationships: { films: :id } })
-      films.pull.should == {}
+      films.render.should == {}
     end
 
   end

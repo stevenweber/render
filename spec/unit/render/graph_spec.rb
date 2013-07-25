@@ -123,13 +123,13 @@ module Render
       end
     end
 
-    describe ".pull" do
+    describe ".render" do
       it "returns its schema's data" do
         pull = { film: { id: UUID.generate } }
         @schema.stub({ pull: pull })
 
         graph = Graph.new(@schema)
-        graph.pull.should == pull
+        graph.render.should == pull
       end
 
       it "sends interpolated endpoint to its schema" do
@@ -138,7 +138,7 @@ module Render
         graph = Graph.new(@schema, { endpoint: endpoint, client_id: client_id })
 
         @schema.should_receive(:pull).with({ endpoint: graph.endpoint }).and_return(@pull)
-        graph.pull.should == @pull
+        graph.render.should == @pull
       end
 
       context "with nested graphs" do
@@ -167,7 +167,7 @@ module Render
           director = Graph.new(@director_schema)
           film = Graph.new(@film_schema, { graphs: [director]})
 
-          film_graph = film.pull[@film_schema.title.to_sym]
+          film_graph = film.render[@film_schema.title.to_sym]
           film_graph.should include(pulled_data)
         end
 
@@ -186,7 +186,7 @@ module Render
             args[:endpoint].should == interpolated_endpoint
           end.and_return({})
 
-          film.pull
+          film.render
         end
 
         context "offline" do
@@ -195,7 +195,7 @@ module Render
             director = Graph.new(@director_schema, { relationships: relationships })
             film = Graph.new(@film_schema, { graphs: [director]})
 
-            film_graph = film.pull[@film_schema.title.to_sym]
+            film_graph = film.render[@film_schema.title.to_sym]
             film_graph[@director_schema.title.to_sym][:id].should == film_graph[:director_id]
           end
         end

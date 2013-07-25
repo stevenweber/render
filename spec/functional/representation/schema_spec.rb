@@ -18,7 +18,7 @@ module Render
       brand_name = "Sony"
       response = { brand: brand_name }
 
-      schema.pull(response).should == {
+      schema.render(response).should == {
         television: { brand: brand_name }
       }
     end
@@ -34,7 +34,7 @@ module Render
 
       television_ids = rand(10).times.collect { UUID.generate }
 
-      schema.pull(television_ids).should == {
+      schema.render(television_ids).should == {
         televisions: television_ids
       }
     end
@@ -55,7 +55,7 @@ module Render
       brand_1, brand_2 = *%w(Sony Samsung)
       response = [{ brand: brand_1 }, { brand: brand_2 }]
 
-      schema.pull(response).should == {
+      schema.render(response).should == {
         televisions: [{ brand: brand_1 }, { brand: brand_2 }]
       }
     end
@@ -78,7 +78,7 @@ module Render
       brand_name = "Sony"
       response = { brand: { name: brand_name } }
 
-      schema.pull(response).should == {
+      schema.render(response).should == {
         television: { brand: { name: brand_name } }
       }
     end
