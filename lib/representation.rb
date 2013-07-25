@@ -3,6 +3,7 @@
 #  - Query its endpoint to construct a hash for its Schema
 #  - Add nested Graphs by interpreting/sending data they need
 
+require "representation/version"
 require "representation/graph"
 require "representation/generator"
 

@@ -1,9 +1,4 @@
 source "http://rubygems.org"
 
-gem "uuid"
-
-group :test do
-  gem "debugger"
-  gem "rspec"
-  gem "webmock"
-end
+# Specify your gem's dependencies in representation.gemspec
+gemspec
