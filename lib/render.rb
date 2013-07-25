@@ -3,6 +3,10 @@
 #  - Query its endpoint to construct a hash for its Schema
 #  - Add nested Graphs by interpreting/sending data they need
 
+require "extensions/enumerable"
+require "extensions/boolean"
+require "extensions/hash"
+
 require "render/version"
 require "render/graph"
 require "render/generator"

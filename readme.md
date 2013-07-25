@@ -14,6 +14,10 @@ Render::Graph.new(:film).render
 
     gem "render"
 
+## Caveats
+
+- Render will modify ::Hash and ::Enumerable to provide symbolize/stringify keys methods.
+
 ## Usage
 
 Try out examples with `Render.live = false`.
