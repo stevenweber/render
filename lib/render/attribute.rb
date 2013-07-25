@@ -3,7 +3,7 @@
 
 require "uuid"
 
-module Representation
+module Render
   class Attribute
     attr_accessor :name, :type, :schema, :archetype, :enums
 
@@ -16,14 +16,14 @@ module Representation
       if (options.keys.first == :type && !options[options.keys.first].is_a?(Hash)) # todo there has to be a better way to do this
         initialize_as_archetype(options)
       else
-        self.type = Representation.parse_type(options[name][:type])
+        self.type = Render.parse_type(options[name][:type])
         self.enums = options[name][:enum]
         initialize_schema!(options) if schema_value?(options)
       end
     end
 
     def initialize_as_archetype(options)
-      self.type = Representation.parse_type(options[:type])
+      self.type = Render.parse_type(options[:type])
       self.enums = options[:enum]
       self.archetype = true
     end
@@ -64,7 +64,7 @@ module Representation
     end
 
     def default_value
-      Representation.live ? nil : faux_value
+      Render.live ? nil : faux_value
     end
 
     def schema_value?(options = {})
@@ -88,7 +88,7 @@ module Representation
     end
 
     def generator_value
-      generator = Representation.generators.detect do |generator|
+      generator = Render.generators.detect do |generator|
         generator.type == type && name.match(generator.matcher)
       end
       generator.algorithm.call if generator

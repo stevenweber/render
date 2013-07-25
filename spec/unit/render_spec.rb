@@ -1,43 +1,43 @@
-require "representation"
+require "render"
 
-describe Representation do
+describe Render do
   # Just give me this one existential thought to commemerate Prague.
   it "exists" do
-    Representation.should be_true
+    Render.should be_true
   end
 
   describe "configuration" do
     describe ".live" do
       before(:each) do
-        @original_live = Representation.live
+        @original_live = Render.live
       end
 
       after(:each) do
-        Representation.live = @original_live
+        Render.live = @original_live
       end
 
       it "defaults to true" do
-        Representation.live.should == true
+        Render.live.should == true
       end
 
       it "can be set to faux-request mode" do
-        Representation.live = false
-        Representation.live.should == false
+        Render.live = false
+        Render.live.should == false
       end
     end
 
     describe ".generators" do
       before(:each) do
-        @original_value = Representation.generators
-        Representation.generators.clear
+        @original_value = Render.generators
+        Render.generators.clear
       end
 
       after(:each) do
-        Representation.generators = @original_value
+        Render.generators = @original_value
       end
 
       it "defaults to an empty array" do
-        Representation.generators.should == []
+        Render.generators.should == []
       end
     end
 
@@ -62,19 +62,19 @@ describe Representation do
       end
 
       after(:each) do
-        Representation.schemas = {}
+        Render.schemas = {}
       end
 
       it "stores JSON files" do
         expect {
-          Representation.load_schemas!(@directory)
-        }.to change { Representation.schemas.keys.size }.by(1)
+          Render.load_schemas!(@directory)
+        }.to change { Render.schemas.keys.size }.by(1)
       end
 
       it "accesses parsed schemas with symbols" do
-        Representation.load_schemas!(@directory)
+        Render.load_schemas!(@directory)
         parsed_json = JSON.parse(@json_schema).recursive_symbolize_keys!
-        Representation.schemas[@schema_title.to_sym].should == parsed_json
+        Render.schemas[@schema_title.to_sym].should == parsed_json
       end
     end
   end

@@ -1,4 +1,4 @@
-# Representation
+# Render
 
 Create and test API requests simply with schemas.
 

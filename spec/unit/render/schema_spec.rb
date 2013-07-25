@@ -1,6 +1,6 @@
-require "representation"
+require "render"
 
-module Representation
+module Render
   describe Schema do
     before(:each) do
       @film_schema = {
@@ -53,14 +53,14 @@ module Representation
         end
 
         it "is set to preloaded schema" do
-          Representation.stub({ schemas: { film: @schema } })
+          Render.stub({ schemas: { film: @schema } })
           Schema.new(:film).schema.should == @schema
         end
 
         it "raises an error if preloaded schema cannot be found" do
           expect {
             Schema.new(:unloaded_schema)
-          }.to raise_error(Representation::Errors::Schema::NotFound)
+          }.to raise_error(Render::Errors::Schema::NotFound)
         end
       end
 
@@ -182,7 +182,7 @@ module Representation
 
       context "faked" do
         before(:each) do
-          Representation.stub({ live: false })
+          Render.stub({ live: false })
         end
 
         it "returns schema with fake values" do
@@ -223,7 +223,7 @@ module Representation
 
     describe "#serialize" do
       it "returns parsed array elements" do
-        Representation.stub({ live: false })
+        Render.stub({ live: false })
         director = Schema.new(@director_schema)
 
         kubrick = "Stanley Kubrick"

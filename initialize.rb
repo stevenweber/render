@@ -4,4 +4,4 @@ end
 
 Dir.glob("extensions/*").sort.each { |file| require file }
 
-require "representation"
+require "render"

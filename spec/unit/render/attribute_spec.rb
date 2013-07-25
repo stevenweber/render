@@ -1,4 +1,4 @@
-module Representation
+module Render
   describe Attribute do
     describe "#initialize" do
       describe "#name" do
@@ -96,12 +96,12 @@ module Representation
     describe "#value" do
       context "offline mode" do
         before(:all) do
-          @original_live = Representation.live
-          Representation.live = false
+          @original_live = Render.live
+          Render.live = false
         end
 
         after(:all) do
-          Representation.live = @original_live
+          Render.live = @original_live
         end
 
         it "generate value based on type" do

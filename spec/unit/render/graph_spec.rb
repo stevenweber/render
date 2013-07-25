@@ -1,8 +1,8 @@
 # encoding: utf-8
-require "representation/graph"
+require "render/graph"
 require "uuid"
 
-module Representation
+module Render
   describe Graph do
     before(:each) do
       @schema = double(:schema)
@@ -143,7 +143,7 @@ module Representation
 
       context "with nested graphs" do
         before(:each) do
-          Representation.stub({ live: false })
+          Render.stub({ live: false })
 
           director_schema = {
             title: "director",

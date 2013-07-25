@@ -3,10 +3,10 @@
 
 require "net/http"
 require "json"
-require "representation"
-require "representation/attribute"
+require "render"
+require "render/attribute"
 
-module Representation
+module Render
   class Schema
     attr_accessor :title,
       :type,
@@ -22,7 +22,7 @@ module Representation
     def initialize(schema_or_title)
       self.schema = schema_or_title.is_a?(Hash) ? schema_or_title : find_schema(schema_or_title)
       self.title = schema[:title]
-      self.type = Representation.parse_type(schema[:type])
+      self.type = Render.parse_type(schema[:type])
 
       if array_of_schemas?(schema[:elements])
         self.attributes = [Attribute.new({ elements: schema[:elements] })]
@@ -41,7 +41,7 @@ module Representation
 
     def pull(options = {})
       endpoint = options.delete(:endpoint)
-      data = Representation.live ? request(endpoint) : options
+      data = Render.live ? request(endpoint) : options
       { title.to_sym => serialize(data) }
     end
 
@@ -53,7 +53,7 @@ module Representation
     private
 
     def find_schema(title)
-      loaded_schema = Representation.schemas[title.to_sym]
+      loaded_schema = Render.schemas[title.to_sym]
       raise Errors::Schema::NotFound.new(title) if !loaded_schema
       loaded_schema
     end
@@ -80,7 +80,7 @@ module Representation
     end
 
     def to_array_of_elements(elements)
-      (elements = stubbed_array) if !Representation.live && (!elements || elements.empty?)
+      (elements = stubbed_array) if !Render.live && (!elements || elements.empty?)
       archetype = attributes.first # there should only be one in the event that it's an array schema
       elements.collect do |element|
         archetype.serialize(element)
@@ -88,7 +88,7 @@ module Representation
     end
 
     def to_array_of_schemas(elements)
-      (elements = stubbed_array) if !Representation.live && (!elements || elements.empty?)
+      (elements = stubbed_array) if !Render.live && (!elements || elements.empty?)
       elements.collect do |element|
         attributes.inject({}) do |attributes, attribute|
           attributes.merge(attribute.to_hash(element)).values.first
@@ -97,7 +97,7 @@ module Representation
     end
 
     def to_hash(explicit_values = {})
-      explicit_values ||= {} # !Representation.live check
+      explicit_values ||= {} # !Render.live check
       attributes.inject({}) do |accum, attribute|
         explicit_value = explicit_values[attribute.name]
         hash = attribute.to_hash(explicit_value)

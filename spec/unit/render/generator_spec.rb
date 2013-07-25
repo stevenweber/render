@@ -1,6 +1,6 @@
-require "representation/generator"
+require "render/generator"
 
-module Representation
+module Render
   describe Generator do
     it "exists" do
       expect { Generator }.to_not raise_error

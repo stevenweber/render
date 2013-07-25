@@ -1,3 +1,3 @@
-module Representation
+module Render
   VERSION = "0.0.1"
 end

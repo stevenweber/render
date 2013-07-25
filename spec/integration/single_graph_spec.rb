@@ -1,12 +1,12 @@
-require "representation"
+require "render"
 
-describe Representation do
+describe Render do
   before(:all) do
-    Representation.load_schemas!(Helpers::SCHEMA_DIRECTORY)
+    Render.load_schemas!(Helpers::SCHEMA_DIRECTORY)
   end
 
   after(:all) do
-    Representation.schemas = {}
+    Render.schemas = {}
   end
 
   before(:each) do
@@ -24,7 +24,7 @@ describe Representation do
       aquatic_uri = @films_endpoint.gsub(":secret_code", "secret_code=#{@secret_code}")
       stub_request(:get, aquatic_uri).to_return({ body: [{ id: @film_id }].to_json })
 
-      graph = Representation::Graph.new(:films, { endpoint: @films_endpoint, secret_code: @secret_code })
+      graph = Render::Graph.new(:films, { endpoint: @films_endpoint, secret_code: @secret_code })
       graph.pull.should == { films: [{ id: @film_id }] }
     end
 
@@ -33,18 +33,18 @@ describe Representation do
       aquatic_uri = @film_endpoint.gsub(":id", id).gsub(":secret_code", "secret_code=#{@secret_code}")
       stub_request(:get, aquatic_uri).to_return({ body: { name: @film_name }.to_json })
 
-      graph = Representation::Graph.new(:film, { id: id, endpoint: @film_endpoint, secret_code: @secret_code })
+      graph = Render::Graph.new(:film, { id: id, endpoint: @film_endpoint, secret_code: @secret_code })
       graph.pull.should == { film: { name: @film_name, year: nil } }
     end
   end
 
   describe "stubbed responses" do
     before(:each) do
-      Representation.stub({ live: false })
+      Render.stub({ live: false })
     end
 
     it "use meaningful values" do
-      response = Representation::Graph.new(:film).pull({ name: @film_name })
+      response = Render::Graph.new(:film).pull({ name: @film_name })
 
       stub_request(:post, "http://films.local/create").to_return({ body: response.to_json })
       response = post_film(:anything)["film"]
@@ -54,7 +54,7 @@ describe Representation do
     end
 
     it "allows users to specify specific values" do
-      response = Representation::Graph.new(:film).pull({ name: @film_name })
+      response = Render::Graph.new(:film).pull({ name: @film_name })
 
       data = { name: @film_name }.to_json
       stub_request(:post, "http://films.local/create").with({ body: data }).to_return({ body: response.to_json })

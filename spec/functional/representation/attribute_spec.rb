@@ -1,21 +1,21 @@
-module Representation
+module Render
   describe Attribute do
     context "generators" do
       before(:each) do
-        @original_generators = Representation.generators
-        @original_live = Representation.live
-        Representation.live = false
+        @original_generators = Render.generators
+        @original_live = Render.live
+        Render.live = false
       end
 
       after(:each) do
-        Representation.generators = @original_generators
-        Representation.live = @original_live
+        Render.generators = @original_generators
+        Render.live = @original_live
       end
 
       it "uses matching generator for #faux_value" do
         name = "Canada Dry"
         generator = Generator.new({ type: String, matcher: %r{.*name.*}, algorithm: proc { name } })
-        Representation.generators << generator
+        Render.generators << generator
 
         Attribute.new({ name: { type: String } }).default_value.should == name
       end

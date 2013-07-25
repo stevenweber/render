@@ -1,6 +1,6 @@
-require "representation/errors"
+require "render/errors"
 
-module Representation
+module Render
   class Generator
     attr_accessor :type, :matcher, :algorithm
 

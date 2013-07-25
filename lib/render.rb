@@ -1,13 +1,13 @@
-# Representation allows one to define object Graphs with Schema/endpoint information.
+# Render allows one to define object Graphs with Schema/endpoint information.
 # Once defined and constructed, a Graph can be built at once that will:
 #  - Query its endpoint to construct a hash for its Schema
 #  - Add nested Graphs by interpreting/sending data they need
 
-require "representation/version"
-require "representation/graph"
-require "representation/generator"
+require "render/version"
+require "render/graph"
+require "render/generator"
 
-module Representation
+module Render
   @live = true
   @schemas = {}
   @generators = []

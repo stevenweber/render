@@ -1,9 +1,9 @@
-require "representation/schema"
+require "render/schema"
 
-module Representation
+module Render
   describe Schema do
     before(:each) do
-      Representation.stub({ live: false })
+      Render.stub({ live: false })
     end
 
     it "parses hash data" do

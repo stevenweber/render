@@ -4,10 +4,10 @@
 #  - Config for this endpoint, e.g. an access token
 #  - Relationships between it and a Graph that includes it
 
-require "representation/schema"
-require "representation/errors"
+require "render/schema"
+require "render/errors"
 
-module Representation
+module Render
   class Graph
     PARAM = %r{:(?<param>[\w_]+)}
     PARAMS = %r{#{PARAM}[\/\;\&]?}

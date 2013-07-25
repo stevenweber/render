@@ -1,12 +1,12 @@
-require "representation"
+require "render"
 
-describe Representation do
+describe Render do
   before(:all) do
-    Representation.load_schemas!(Helpers::SCHEMA_DIRECTORY)
+    Render.load_schemas!(Helpers::SCHEMA_DIRECTORY)
   end
 
   after(:all) do
-    Representation.schemas = {}
+    Render.schemas = {}
   end
 
   describe "request" do
@@ -29,10 +29,10 @@ describe Representation do
       stub_request(:get, darjeeling_uri).to_return({ body: { name: darjeeling_name }.to_json })
 
       options = {
-        graphs: [Representation::Graph.new(:film, { endpoint: @film_endpoint, relationships: { id: :id }})],
+        graphs: [Render::Graph.new(:film, { endpoint: @film_endpoint, relationships: { id: :id }})],
         endpoint: @films_endpoint
       }
-      graph = Representation::Graph.new(:films, options)
+      graph = Render::Graph.new(:films, options)
       graph.pull.should == {
         films: [
           { name: aquatic_name, year: nil },

@@ -1,16 +1,16 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'representation/version'
+require 'render/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "representation"
-  spec.version       = Representation::VERSION
+  spec.name          = "render"
+  spec.version       = Render::VERSION
   spec.authors       = ["Steve Weber"]
   spec.email         = ["steve@copyright1984.com"]
   spec.description   = %q{Simple management of API calls.}
-  spec.summary       = %q{With a JSON schema, Representation will manage requests, dependent request and build meaningful, extensible sample data for testing.}
-  spec.homepage      = "https://github.com/stevenweber/representation"
+  spec.summary       = %q{With a JSON schema, Render will manage requests, dependent request and build meaningful, extensible sample data for testing.}
+  spec.homepage      = "https://github.com/stevenweber/render"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)

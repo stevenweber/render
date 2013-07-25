@@ -1,4 +1,4 @@
-module Representation
+module Render
   module Errors
     class Generator
       class MalformedAlgorithm < StandardError
