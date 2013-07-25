@@ -59,7 +59,7 @@ module Render
     end
 
     def request(endpoint)
-      response = Net::HTTP.get_response(URI(endpoint))
+      response = Net::HTTP.get_response(URI(endpoint)) # TODO Custom requests
       if response.kind_of?(Net::HTTPSuccess)
         response = JSON.parse(response.body).recursive_symbolize_keys!
         if (response.is_a?(Array) || (response[title.to_sym] == nil))

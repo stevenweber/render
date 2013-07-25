@@ -39,6 +39,12 @@ graph.render({ id: "an-id" }) # makes request to "http://films.local/films/an-id
 
 Check out the examples in [integration tests](spec/integration/).
 
+## Roadmap
+
+1. Custom HTTP headers (e.g. { pragma: "no-cache", host: "dont_redirect_to_www.site.com" })
+2. Enhanced Attribute metadata (e.g. minlength)
+3. Parental params from root-level array
+4. Deep merge in #render for faux values
 
 ## Contributing
 
