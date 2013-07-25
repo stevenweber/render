@@ -80,7 +80,7 @@ module Representation
     end
 
     def to_array_of_elements(elements)
-      (elements = stubbed_array) if !Representation.live && !elements
+      (elements = stubbed_array) if !Representation.live && (!elements || elements.empty?)
       archetype = attributes.first # there should only be one in the event that it's an array schema
       elements.collect do |element|
         archetype.serialize(element)
@@ -88,7 +88,7 @@ module Representation
     end
 
     def to_array_of_schemas(elements)
-      (elements = stubbed_array) if !Representation.live && !elements
+      (elements = stubbed_array) if !Representation.live && (!elements || elements.empty?)
       elements.collect do |element|
         attributes.inject({}) do |attributes, attribute|
           attributes.merge(attribute.to_hash(element)).values.first
