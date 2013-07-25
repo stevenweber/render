@@ -101,4 +101,3 @@ module Representation
     end
   end
 end
-

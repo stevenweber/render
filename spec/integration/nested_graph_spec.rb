@@ -40,5 +40,38 @@ describe Representation do
         ]
       }
     end
+
+    it "makes subsequent calls from archetype array data" do
+      pending "Simple arrays need to be able to make multiple calls"
+
+      stub_request(:get, @films_endpoint).to_return({ body: [@aquatic_id, @darjeeling_id].to_json })
+
+      aquatic = @film_endpoint.gsub("id", @aquatic_id)
+      stub_request(:get, aquatic).to_return({ body: { name: @aquatic_name }.to_json })
+
+      darjeeling = @film_endpoint.gsub("id", @darjeeling_id)
+      stub_request(:get, darjeeling).to_return({ body: { name: @darjeeling_name }.to_json })
+
+      films = Representation::Schema.new({
+        title: :films,
+        type: Array,
+        elements: {
+          type: UUID
+        }
+      })
+
+      film = Representation::Schema.new({
+        title: :film,
+        type: Object,
+        attributes: {
+          title: { type: String }
+        }
+      })
+
+      films = Representation::Graph.new(films, { endpoint: @films_endpoint })
+      films.graphs << Representation::Graph.new(film, { endpoint: @film_endpoint, relationships: { films: :id } })
+      films.pull.should == {}
+    end
+
   end
 end
