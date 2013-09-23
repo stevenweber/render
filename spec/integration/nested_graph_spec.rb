@@ -55,7 +55,7 @@ describe Render do
       films = Representation::Schema.new({
         title: :films,
         type: Array,
-        elements: {
+        items: {
           type: UUID
         }
       })
@@ -63,7 +63,7 @@ describe Render do
       film = Representation::Schema.new({
         title: :film,
         type: Object,
-        attributes: {
+        properties: {
           title: { type: String }
         }
       })

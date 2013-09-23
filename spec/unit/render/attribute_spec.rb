@@ -35,7 +35,7 @@ module Render
           options = {
             film: {
               type: Object,
-              attributes: {
+              properties: {
                 year: { type: Integer }
               }
             }
@@ -44,9 +44,9 @@ module Render
           schema = Attribute.new(options).schema
           schema.title.should == :film
           schema.type.should == Object
-          attributes = schema.attributes
-          attributes.size.should == 1
-          attribute = attributes.first
+          properties = schema.properties
+          properties.size.should == 1
+          attribute = properties.first
           attribute.name.should == :year
           attribute.type.should == Integer
         end
@@ -62,24 +62,24 @@ module Render
     end
 
     describe "#to_hash" do
-      it "converts attributes to hashes" do
-        attributes = { foo: { type: String } }
-        attribute = Attribute.new(attributes)
+      it "converts properties to hashes" do
+        properties = { foo: { type: String } }
+        attribute = Attribute.new(properties)
         attribute.to_hash.should == { foo: nil }
       end
 
-      it "converts attributes to hashes with values" do
-        attributes = { foo: { type: String } }
-        attribute = Attribute.new(attributes)
+      it "converts properties to hashes with values" do
+        properties = { foo: { type: String } }
+        attribute = Attribute.new(properties)
         attribute.to_hash("bar").should == { foo: "bar" }
       end
 
       it "converts schema values to hashes" do
         schema_name = "foo"
-        attributes = {
+        properties = {
           schema_name => {
             type: Object,
-            attributes: {
+            properties: {
               attribute: { type: String }
             }
           }
@@ -88,7 +88,7 @@ module Render
         value = "baz"
         data = { attribute: value }
 
-        attribute = Attribute.new(attributes)
+        attribute = Attribute.new(properties)
         attribute.to_hash(data).should == { foo: { :attribute => value } }
       end
     end

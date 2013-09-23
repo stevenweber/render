@@ -9,9 +9,11 @@ module Render
 
     # Initialize take a few different Hashes
     # { name: { type: UUID } } for standard Hashes to be aligned
-    # { type: UUID } for elements in an array to be parsed
-    # { name: { type: Object, attributes { ... } } for nested schemas
+    # { type: UUID } for items in an array to be parsed
+    # { format: "uuid" }
+    # { name: { type: Object, properties { ... } } for nested schemas
     def initialize(options = {})
+      Render.logger.debug("Initializing attribute #{options}")
       self.name = options.keys.first
       if (options.keys.first == :type && !options[options.keys.first].is_a?(Hash)) # todo there has to be a better way to do this
         initialize_as_archetype(options)
@@ -23,7 +25,8 @@ module Render
     end
 
     def initialize_as_archetype(options)
-      self.type = Render.parse_type(options[:type])
+      bias_type = options[:format] || options[:type]
+      self.type = Render.parse_type(bias_type)
       self.enums = options[:enum]
       self.archetype = true
     end
@@ -35,10 +38,10 @@ module Render
       }
 
       definition = options[name]
-      if definition.keys.include?(:attributes)
-        schema_options.merge!({ attributes: definition[:attributes] })
+      if definition.keys.include?(:properties)
+        schema_options.merge!({ properties: definition[:properties] })
       else
-        schema_options.merge!({ elements: definition[:elements] })
+        schema_options.merge!({ items: definition[:items] })
       end
 
       self.schema = Schema.new(schema_options)
@@ -69,7 +72,7 @@ module Render
 
     def schema_value?(options = {})
       return true if schema
-      options[name].is_a?(Hash) && (options[name][:attributes] || options[name][:elements])
+      options[name].is_a?(Hash) && (options[name][:properties] || options[name][:items])
     end
 
     private

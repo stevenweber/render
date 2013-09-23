@@ -10,7 +10,7 @@ module Render
       schema = Schema.new({
         title: "television",
         type: Object,
-        attributes: {
+        properties: {
           brand: { type: String }
         }
       })
@@ -27,7 +27,7 @@ module Render
       schema = Schema.new({
         title: "televisions",
         type: Array,
-        elements: {
+        items: {
           type: UUID
         }
       })
@@ -43,10 +43,10 @@ module Render
       schema = Schema.new({
         title: :televisions,
         type: Array,
-        elements: {
+        items: {
           title: :television,
           type: Object,
-          attributes: {
+          properties: {
             brand: { type: String }
           }
         }
@@ -64,11 +64,11 @@ module Render
       schema = Schema.new({
         title: :television,
         type: Object,
-        attributes: {
+        properties: {
           brand: {
             title: :brand,
             type: Object,
-            attributes: {
+            properties: {
               name: { type: String }
             }
           }

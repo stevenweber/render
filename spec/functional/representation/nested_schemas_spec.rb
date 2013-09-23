@@ -10,10 +10,10 @@ module Render
       schema = {
         title: "person",
         type: Object,
-        attributes: {
+        properties: {
           contact: {
             type: Object,
-            attributes: {
+            properties: {
               name: { type: String },
               phone: { type: String }
             }
@@ -46,18 +46,18 @@ module Render
       schema = {
         title: "people",
         type: Array,
-        elements: {
+        items: {
           title: :person,
           type: Object,
-          attributes: {
+          properties: {
             name: { type: String },
             nicknames: {
               title: "nicknames",
               type: Array,
-              elements: {
+              items: {
                 title: :formalized_name,
                 type: Object,
-                attributes: {
+                properties: {
                   name: { type: String },
                   age: { type: Integer }
                 }

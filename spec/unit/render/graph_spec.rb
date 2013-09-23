@@ -30,7 +30,7 @@ module Render
         end
       end
 
-      it "sets attributes" do
+      it "sets properties" do
         relationships = { director_id: :id }
         graphs = [double(:graph)]
         graph = Graph.new(@schema, {
@@ -42,7 +42,7 @@ module Render
         graph.graphs.should == graphs
       end
 
-      it "treats non-used attributes as config" do
+      it "treats non-used properties as config" do
         relationships = { some: :relationship }
         graphs = [double(:some_graph)]
         client_id = UUID.generate
@@ -89,7 +89,7 @@ module Render
         graph.endpoint.should == interpolated_endpoint
       end
 
-      it "interpolates config attributes" do
+      it "interpolates config properties" do
         client_id = UUID.generate
         endpoint = "http://endpoint.local/?:client_id"
         interpolated_endpoint = "http://endpoint.local/?client_id=#{client_id}"
@@ -157,14 +157,14 @@ module Render
           director_schema = {
             title: "director",
             type: Object,
-            attributes: { id: { type: UUID } }
+            properties: { id: { type: UUID } }
           }
           @director_schema = Schema.new(director_schema)
 
           film_schema = {
             title: "film",
             type: Object,
-            attributes: { director_id: { type: UUID } }
+            properties: { director_id: { type: UUID } }
           }
           @film_schema = Schema.new(film_schema)
         end
@@ -199,7 +199,7 @@ module Render
         end
 
         context "offline" do
-          it "uses parent data for childrens attributes" do
+          it "uses parent data for childrens properties" do
             relationships = { director_id: :id }
             director = Graph.new(@director_schema, { relationships: relationships })
             film = Graph.new(@film_schema, { graphs: [director]})

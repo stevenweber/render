@@ -6,7 +6,7 @@ module Render
       expect { Generator }.to_not raise_error
     end
 
-    describe "attributes" do
+    describe "properties" do
       before(:each) do
         @mandatory_options = { algorithm: proc {} }
       end
@@ -15,7 +15,7 @@ module Render
         Generator.new(@mandatory_options.merge({ type: String })).type.should == String
       end
 
-      it "has a matcher to only be used on specific attributes" do
+      it "has a matcher to only be used on specific properties" do
         matcher = %r{.*name.*}
         Generator.new(@mandatory_options.merge({ matcher: matcher })).matcher.should == matcher
       end

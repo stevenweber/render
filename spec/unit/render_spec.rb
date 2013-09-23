@@ -26,6 +26,12 @@ describe Render do
       end
     end
 
+    describe "logger" do
+      it "exits" do
+        Render.logger.should be
+      end
+    end
+
     describe ".generators" do
       before(:each) do
         @original_value = Render.generators
@@ -48,7 +54,7 @@ describe Render do
           {
             "title": "#{@schema_title}",
             "type": "object",
-            "attributes": {
+            "properties": {
               "name": { "type": "string" },
               "year": { "type": "integer" }
             }

@@ -10,17 +10,20 @@ require "extensions/hash"
 require "render/version"
 require "render/graph"
 require "render/generator"
+require "logger"
 
 module Render
   @live = true
   @schemas = {}
   @generators = []
+  @logger = ::Logger.new($stdout)
 
   class << self
-    attr_accessor :live, :schemas, :generators
+    attr_accessor :live, :schemas, :generators, :logger
 
     def load_schemas!(directory)
       Dir.glob("#{directory}/**/*.json").each do |schema_file|
+        logger.info("Reading #{schema_file} schema")
         parsed_schema = parse_schema(File.read(schema_file))
         schema_title = parsed_schema[:title].to_sym
         # TODO Throw an error in the event of conflicts?
@@ -36,6 +39,7 @@ module Render
       if type.is_a?(String)
         return UUID if type == "uuid"
         return Boolean if type == "boolean"
+        return Float if type == "number"
         Object.const_get(type.capitalize) # TODO better type parsing
       else
         type

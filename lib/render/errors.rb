@@ -23,7 +23,7 @@ module Render
         end
 
         def to_s
-          "No value for key #{config_key} found in config or parental_attributes."
+          "No value for key #{config_key} found in config or parental_properties."
         end
       end
     end

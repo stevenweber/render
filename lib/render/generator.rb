@@ -4,9 +4,9 @@ module Render
   class Generator
     attr_accessor :type, :matcher, :algorithm
 
-    def initialize(attributes = {})
-      attributes.symbolize_keys!
-      %w(type matcher algorithm).each { |attribute| self.__send__("#{attribute}=", attributes[attribute.to_sym]) }
+    def initialize(properties = {})
+      properties.symbolize_keys!
+      %w(type matcher algorithm).each { |attribute| self.__send__("#{attribute}=", properties[attribute.to_sym]) }
       raise Errors::Generator::MalformedAlgorithm.new(algorithm) if !algorithm.respond_to?(:call)
     end
 

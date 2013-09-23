@@ -6,7 +6,7 @@ module Render
       @film_schema = {
         title: "film",
         type: Object,
-        attributes: {
+        properties: {
           name: { type: String },
           genre: { type: String }
         }
@@ -15,9 +15,9 @@ module Render
       @films_schema = {
         title: "films",
         type: Array,
-        elements: {
+        items: {
           title: :film,
-          attributes: {
+          properties: {
             name: { type: String },
             genre: { type: String }
           }
@@ -27,12 +27,12 @@ module Render
       @director_schema = {
         title: "director",
         type: Object,
-        attributes: {
+        properties: {
           films: {
             type: Array,
-            elements: {
+            items: {
               type: Object,
-              attributes: {
+              properties: {
                 name: { type: String },
                 year: { type: Integer }
               }
@@ -45,7 +45,7 @@ module Render
     describe "#initialize" do
       describe "#schema" do
         before(:each) do
-          @schema = { attributes: {} }
+          @schema = { properties: {} }
         end
 
         it "is set to hash argument" do
@@ -66,56 +66,56 @@ module Render
 
       it "sets title from schema" do
         title = "films"
-        schema = { title: title, attributes: {} }
+        schema = { title: title, properties: {} }
         Schema.new(schema).title.should == title
       end
 
       describe "#type" do
         it "is set from schema" do
           type = [Array, Object].sample
-          schema = { type: type, attributes: {} }
+          schema = { type: type, properties: {} }
           Schema.new(schema).type.should == type
         end
 
         it "is parsed from string" do
-          schema = { type: "string", attributes: {} }
+          schema = { type: "string", properties: {} }
           Schema.new(schema).type.should == String
         end
       end
 
-      describe "#attributes" do
-        it "is set with simple Attributes" do
+      describe "#properties" do
+        it "is set with simple properties" do
           simple_schema = {
-            attributes: {
+            properties: {
               name: { type: String },
               genre: { type: String }
             }
           }
 
           schema = Schema.new(simple_schema)
-          schema.attributes.size.should == 2
-          schema.attributes.any? { |a| a.name == :name && a.type == String }.should == true
-          schema.attributes.any? { |a| a.name == :genre && a.type == String }.should == true
+          schema.properties.size.should == 2
+          schema.properties.any? { |a| a.name == :name && a.type == String }.should == true
+          schema.properties.any? { |a| a.name == :genre && a.type == String }.should == true
         end
 
         it "is set with array archetypes" do
           archetype_schema = {
-            elements: {
+            items: {
               type: String
             }
           }
 
-          attributes = Schema.new(archetype_schema).attributes
-          attributes.size.should == 1
-          attributes.first.type.should == String
+          properties = Schema.new(archetype_schema).properties
+          properties.size.should == 1
+          properties.first.type.should == String
         end
 
-        it "is set with schema-Attributes" do
+        it "is set with schema-properties" do
           nested_schema = {
-            attributes: {
+            properties: {
               film: {
                 type: Object,
-                attributes: {
+                properties: {
                   name: { type: String }
                 }
               }
@@ -123,24 +123,24 @@ module Render
           }
 
           schema = Schema.new(nested_schema)
-          schema.attributes.size.should == 1
-          schema.attributes.first.schema.should be
+          schema.properties.size.should == 1
+          schema.properties.first.schema.should be
         end
 
-        it "is set with array-Attributes" do
+        it "is set with array-properties" do
           array_schema = {
-            elements: {
+            items: {
               film: {
                 type: Object,
-                attributes: {
+                properties: {
                   name: { type: String }
                 }
               }
             }
           }
           schema = Schema.new(array_schema)
-          schema.attributes.size.should == 1
-          schema.attributes.first.schema.should be
+          schema.properties.size.should == 1
+          schema.properties.first.schema.should be
         end
       end
     end
@@ -222,7 +222,7 @@ module Render
     end
 
     describe "#serialize" do
-      it "returns parsed array elements" do
+      it "returns parsed array items" do
         Render.stub({ live: false })
         director = Schema.new(@director_schema)
 

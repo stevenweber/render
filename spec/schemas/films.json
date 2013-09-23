@@ -1,10 +1,10 @@
 {
   "title": "films",
   "type": "array",
-  "elements": {
+  "items": {
     "title": "film",
     "type" : "object",
-    "attributes" : {
+    "properties" : {
       "id" : {
         "type": "uuid"
       }
