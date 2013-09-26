@@ -28,7 +28,7 @@ module Render
       if array_of_schemas?(schema[:items])
         self.properties = [Attribute.new({ items: schema[:items] })]
       elsif array_of_archetypes?(schema[:items])
-        options = { type: schema[:items][:type], format: schema[:items][:format] }
+        options = { type: schema[:items][:type], format: schema[:items][:format], enum: schema[:items][:enum] }
         self.properties = [Attribute.new(options)]
       else
         definitions = schema[:properties] || schema[:items]
