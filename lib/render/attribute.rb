@@ -5,7 +5,7 @@ require "uuid"
 
 module Render
   class Attribute
-    attr_accessor :name, :type, :schema, :archetype, :enums
+    attr_accessor :name, :type, :schema, :archetype, :enums, :format
 
     # Initialize take a few different Hashes
     # { name: { type: UUID } } for standard Hashes to be aligned
@@ -20,6 +20,7 @@ module Render
       else
         self.type = Render.parse_type(options[name][:type])
         self.enums = options[name][:enum]
+        self.format = options[name][:format]
         initialize_schema!(options) if schema_value?(options)
       end
     end
@@ -27,6 +28,7 @@ module Render
     def initialize_as_archetype(options)
       bias_type = options[:format] || options[:type]
       self.type = Render.parse_type(bias_type)
+      self.format = options[:format]
       self.enums = options[:enum]
       self.archetype = true
     end
@@ -82,7 +84,10 @@ module Render
       return enums.sample if enums
       return generator_value if generator_value # todo optimize generator_value call
 
-      case(type.name)
+      bias_type = Render.parse_type(format) rescue nil
+      bias_type ||= type
+
+      case(bias_type.name)
       when("String") then "A String"
       when("Integer") then rand(1000)
       when("UUID") then UUID.generate
