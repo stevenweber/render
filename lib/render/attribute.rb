@@ -87,6 +87,7 @@ module Render
       when("Integer") then rand(1000)
       when("UUID") then UUID.generate
       when("Boolean") then [true, false].sample
+      when("Float") then rand(0.1..99)
       end
     end
 
