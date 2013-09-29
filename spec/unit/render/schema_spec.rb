@@ -43,48 +43,31 @@ module Render
     end
 
     describe "#initialize" do
-      describe "#schema" do
-        before(:each) do
-          @schema = { properties: {} }
-        end
-
-        it "is set to hash argument" do
-          Schema.new(@schema).schema.should == @schema
-        end
-
-        it "is set to preloaded schema" do
-          Render.stub({ schemas: { film: @schema } })
-          Schema.new(:film).schema.should == @schema
-        end
-
-        it "raises an error if preloaded schema cannot be found" do
-          expect {
-            Schema.new(:unloaded_schema)
-          }.to raise_error(Render::Errors::Schema::NotFound)
-        end
+      it "sets schema from argument" do
+        schema = { properties: {} }
+        Schema.new(schema).schema.should == schema
       end
 
-      it "sets title from schema" do
-        title = "films"
-        schema = { title: title, properties: {} }
-        Schema.new(schema).title.should == title
+      it "sets schema from preloaded schemas" do
+        schema = { title: :preloaded_schema, properties: { title: { type: String } } }
+        Render.load_schema!(schema)
+        Schema.new(:preloaded_schema).schema.should == schema
       end
 
-      describe "#type" do
-        it "is set from schema" do
-          type = [Array, Object].sample
-          schema = { type: type, properties: {} }
-          Schema.new(schema).type.should == type
-        end
+      it "raises an error if preloaded schema cannot be found" do
+        expect {
+          Schema.new(:unloaded_schema)
+        }.to raise_error(Render::Errors::Schema::NotFound)
+      end
 
-        it "is parsed from string" do
-          schema = { type: "string", properties: {} }
-          Schema.new(schema).type.should == String
-        end
+      it "sets its type from schema" do
+        type = [Array, Object].sample
+        schema = { type: type, properties: {} }
+        Schema.new(schema).type.should == type
       end
 
       describe "#properties" do
-        it "is set with simple properties" do
+        it "sets properties to schema attributes" do
           simple_schema = {
             properties: {
               name: { type: String },
@@ -98,8 +81,9 @@ module Render
           schema.properties.any? { |a| a.name == :genre && a.type == String }.should == true
         end
 
-        it "is set with array archetypes" do
+        it "sets properties to array of archetype attributes" do
           archetype_schema = {
+            type: Array,
             items: {
               type: String
             }
@@ -107,40 +91,28 @@ module Render
 
           properties = Schema.new(archetype_schema).properties
           properties.size.should == 1
-          properties.first.type.should == String
+          archetype = properties.first
+          archetype.type.should == String
+          archetype.archetype.should == true
         end
 
-        it "is set with schema-properties" do
-          nested_schema = {
-            properties: {
-              film: {
-                type: Object,
-                properties: {
-                  name: { type: String }
-                }
-              }
-            }
-          }
-
-          schema = Schema.new(nested_schema)
-          schema.properties.size.should == 1
-          schema.properties.first.schema.should be
-        end
-
-        it "is set with array-properties" do
+        it "sets properties to array of nested schemas" do
           array_schema = {
+            type: Array,
             items: {
-              film: {
-                type: Object,
-                properties: {
-                  name: { type: String }
-                }
+              type: Object,
+              properties: {
+                title: { type: String }
               }
             }
           }
+
           schema = Schema.new(array_schema)
           schema.properties.size.should == 1
-          schema.properties.first.schema.should be
+          attribute = schema.properties.first
+          attribute.schema.should be
+          attribute.schema.properties.size.should == 1
+          attribute.schema.properties.first.name.should == :title
         end
       end
     end

@@ -18,21 +18,21 @@ module Render
       :relationships,
       :graphs,
       :params,
-      :parental_params, # TODO rename this to inherited_params
+      :inherited_params,
       :config
 
-    def initialize(schema, properties = {})
+    def initialize(schema, options = {})
       self.schema = if schema.is_a?(Symbol)
         Schema.new(schema)
       else
         schema
       end
 
-      self.relationships = (properties.delete(:relationships) || {})
-      self.raw_endpoint = (properties.delete(:endpoint) || "")
-      self.graphs = (properties.delete(:graphs) || [])
-      self.config = properties
-      self.parental_params = {}
+      self.relationships = (options.delete(:relationships) || {})
+      self.raw_endpoint = (options.delete(:endpoint) || "")
+      self.graphs = (options.delete(:graphs) || [])
+      self.config = options
+      self.inherited_params = {}
 
       initialize_params!
     end
@@ -55,14 +55,18 @@ module Render
       uri.to_s
     end
 
+    def prepare!(inherited_attributes = {})
+      calculate_inherited_params!(inherited_attributes)
+    end
+
     def render(inherited_properties = {})
-      calculate_parental_params!(inherited_properties)
-      graph_properties = schema.render(inherited_properties.merge(parental_params.merge({ endpoint: endpoint })))
+      prepare!(inherited_properties)
+      graph_properties = schema.render(inherited_properties.merge(inherited_params.merge({ endpoint: endpoint })))
 
       graph = graphs.inject(graph_properties) do |properties, nested_graph|
         threads = []
         # TODO threading should be configured so people may also think about Thread.abort_on_transaction!
-        threads << Thread.new do
+        # threads << Thread.new do
           title = schema.title.to_sym
           parent_data = properties[title]
           nested_graph_data = if parent_data.is_a?(Array)
@@ -75,8 +79,8 @@ module Render
             data = nested_graph.render(parent_data)
             parent_data.merge!(data)
           end
-        end
-        threads.collect(&:join)
+        # end
+        # threads.collect(&:join)
         properties
       end
       DottableHash.new(graph)
@@ -90,8 +94,8 @@ module Render
       end
     end
 
-    def calculate_parental_params!(inherited)
-      self.parental_params = relationships.inject(inherited) do |properties, (parent_key, child_key)|
+    def calculate_inherited_params!(inherited)
+      self.inherited_params = relationships.inject(inherited) do |properties, (parent_key, child_key)|
         properties.merge({ child_key => inherited[parent_key] })
       end
     end
@@ -101,7 +105,7 @@ module Render
     end
 
     def param_value(key)
-      parental_params[key] || config[key] || raise(Errors::Graph::EndpointKeyNotFound.new(key))
+      inherited_params[key] || config[key] || raise(Errors::Graph::EndpointKeyNotFound.new(key))
     end
 
   end

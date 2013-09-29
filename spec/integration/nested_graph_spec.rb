@@ -42,7 +42,7 @@ describe Render do
     end
 
     it "makes subsequent calls from archetype array data" do
-      pending "Simple arrays need to be able to make multiple calls"
+      pending
 
       stub_request(:get, @films_endpoint).to_return({ body: [@aquatic_id, @darjeeling_id].to_json })
 
@@ -52,7 +52,7 @@ describe Render do
       darjeeling = @film_endpoint.gsub("id", @darjeeling_id)
       stub_request(:get, darjeeling).to_return({ body: { name: @darjeeling_name }.to_json })
 
-      films = Representation::Schema.new({
+      films = Render::Schema.new({
         title: :films,
         type: Array,
         items: {
@@ -60,16 +60,16 @@ describe Render do
         }
       })
 
-      film = Representation::Schema.new({
+      film = Render::Schema.new({
         title: :film,
         type: Object,
         properties: {
-          title: { type: String }
+          name: { type: String }
         }
       })
 
-      films = Representation::Graph.new(films, { endpoint: @films_endpoint })
-      films.graphs << Representation::Graph.new(film, { endpoint: @film_endpoint, relationships: { films: :id } })
+      films = Render::Graph.new(films, { endpoint: @films_endpoint })
+      films.graphs << Render::Graph.new(film, { endpoint: @film_endpoint, relationships: { id: :id } })
       films.render.should == {}
     end
 

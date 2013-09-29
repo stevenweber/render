@@ -25,10 +25,14 @@ module Render
       Dir.glob("#{directory}/**/*.json").each do |schema_file|
         logger.info("Reading #{schema_file} schema")
         parsed_schema = parse_schema(File.read(schema_file))
-        schema_title = parsed_schema[:title].to_sym
-        # TODO Throw an error in the event of conflicts?
-        self.schemas[schema_title] = parsed_schema
+        load_schema!(parsed_schema)
       end
+    end
+
+    def load_schema!(schema)
+      schema_title = schema[:title].to_sym
+      # TODO Throw an error in the event of conflicts?
+      self.schemas[schema_title] = schema
     end
 
     def parse_schema(json)
