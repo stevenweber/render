@@ -29,7 +29,7 @@ module Render
     end
 
     class Schema
-      class NotFound < StandardError
+      class DefinitionNotFound < StandardError
         attr_accessor :title
 
         def initialize(title)

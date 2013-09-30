@@ -11,40 +11,42 @@ require "render/version"
 require "render/graph"
 require "render/generator"
 require "logger"
+require "date"
 
 module Render
   @live = true
-  @schemas = {}
+  @definitions = {}
   @generators = []
   @logger = ::Logger.new($stdout)
 
   class << self
-    attr_accessor :live, :schemas, :generators, :logger
+    attr_accessor :live,
+      :definitions,
+      :generators,
+      :logger
 
-    def load_schemas!(directory)
-      Dir.glob("#{directory}/**/*.json").each do |schema_file|
-        logger.info("Reading #{schema_file} schema")
-        parsed_schema = parse_schema(File.read(schema_file))
-        load_schema!(parsed_schema)
+    def load_definitions!(directory)
+      Dir.glob("#{directory}/**/*.json").each do |definition_file|
+        logger.info("Reading #{definition_file} definition")
+        definition_string = File.read(definition_file)
+        parsed_definition = JSON.parse(definition_string).recursive_symbolize_keys!
+        load_definition!(parsed_definition)
       end
     end
 
-    def load_schema!(schema)
-      schema_title = schema[:title].to_sym
-      # TODO Throw an error in the event of conflicts?
-      self.schemas[schema_title] = schema
+    def load_definition!(definition)
+      title = definition.fetch(:title).to_sym
+      self.definitions[title] = definition
     end
 
-    def parse_schema(json)
-      JSON.parse(json).recursive_symbolize_keys!
-    end
-
+    # TODO better type parsing
     def parse_type(type)
       if type.is_a?(String)
         return UUID if type == "uuid"
         return Boolean if type == "boolean"
         return Float if type == "number"
-        Object.const_get(type.capitalize) # TODO better type parsing
+        return Time if type == "date-time"
+        Object.const_get(type.capitalize)
       else
         type
       end

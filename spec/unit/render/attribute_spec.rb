@@ -61,35 +61,35 @@ module Render
       end
     end
 
-    describe "#to_hash" do
-      it "converts properties to hashes" do
-        properties = { foo: { type: String } }
-        attribute = Attribute.new(properties)
-        attribute.to_hash.should == { foo: nil }
+    describe "#serialize" do
+      it "returns attribute with its value" do
+        attribute = Attribute.new({ title: { type: String } })
+        title = "the title"
+        attribute.serialize(title).should == { title: title }
       end
 
-      it "converts properties to hashes with values" do
-        properties = { foo: { type: String } }
-        attribute = Attribute.new(properties)
-        attribute.to_hash("bar").should == { foo: "bar" }
+      describe "archetype" do
+        it "returns only a value" do
+          id = UUID.generate
+          attribute = Attribute.new({ format: UUID })
+          attribute.serialize(id).should == id
+        end
       end
 
-      it "converts schema values to hashes" do
-        schema_name = "foo"
-        properties = {
-          schema_name => {
-            type: Object,
-            properties: {
-              attribute: { type: String }
-            }
-          }
-        }
+      describe "nested schema" do
+        it "returns serialized schema" do
+          attribute = Attribute.new({ film: { type: Object, properties: { title: { type: String } } } })
+          title = "the title"
+          attribute.serialize({ title: title }).should == { film: { title: title } }
+        end
+      end
 
-        value = "baz"
-        data = { attribute: value }
+      it "uses faux data when offline" do
+        type = [String, Integer].sample
+        Render.stub({ live: false })
 
-        attribute = Attribute.new(properties)
-        attribute.to_hash(data).should == { foo: { :attribute => value } }
+        data = Attribute.new({ title: { type: type } }).serialize(nil)
+        data[:title].should be_a(type)
       end
     end
 

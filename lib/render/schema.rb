@@ -5,114 +5,67 @@ require "net/http"
 require "json"
 require "render"
 require "render/attribute"
+require "render/array_attribute"
+require "render/hash_attribute"
+require "render/dottable_hash"
 
 module Render
   class Schema
     attr_accessor :title,
       :type,
-      :properties,
-      :schema
+      :definition,
+      :array_attribute,
+      :hash_attributes,
+      :data
 
-    # The schema need to know where its getting a value from
-    # an Attribute, e.g. { foo: "bar" } => { foo: { type: String } }
-    # an Archetype, e.g. [1,2,3] => { type: Integer } # could this be a pass-through?
-    # an Attribute-Schema, e.g. { foo: { bar: "baz" } } => { foo: { type: Object, properties: { bar: { type: String } } }
-    # an Attribute-Array, e.g. [{ foo: "bar" }] => { type: Array, items: { type: Object, properties: { foo: { type: String } } } }
-    # and we need to identify when given { ids: [1,2] }, parental_mapping { ids: id } means to make 2 calls
-    def initialize(schema_or_title)
-      self.schema = schema_or_title.is_a?(Hash) ? schema_or_title : find_schema(schema_or_title)
-      Render.logger.debug("Loading #{schema_or_title}")
-      self.title = schema[:title]
-      self.type = Render.parse_type(schema[:type])
+    # TODO When given { ids: [1,2] }, parental_mapping { ids: id } means to make 2 calls
+    def initialize(definition_or_title)
+      Render.logger.debug("Loading #{definition_or_title}")
+      self.definition = Render.definitions.fetch(definition_or_title, definition_or_title)
+      self.title = definition[:title].to_sym rescue :untitled
+      self.type = Render.parse_type(definition[:type])
 
-      if array_of_schemas?(schema[:items])
-        self.properties = [Attribute.new({ items: schema[:items] })]
-      elsif array_of_archetypes?(schema[:items])
-        options = { type: schema[:items][:type], format: schema[:items][:format], enum: schema[:items][:enum] }
-        self.properties = [Attribute.new(options)]
+      if (type == Array)
+        self.array_attribute = ArrayAttribute.new(definition)
       else
-        definitions = schema[:properties] || schema[:items]
-        self.properties = definitions.collect do |key, value|
-          Attribute.new({ key => value })
+        self.hash_attributes = definition.fetch(:properties).collect do |name, attribute_definition|
+          HashAttribute.new({ name => attribute_definition })
         end
       end
-    end
-
-    def array_of_schemas?(definition = {})
-      return false unless definition
-      definition.keys.include?(:properties)
-    end
-
-    def array_of_archetypes?(definition = {})
-      # TODO test this
-      return false unless definition
-      !definition.keys.include?(:properties)
     end
 
     def render(options = {})
       endpoint = options.delete(:endpoint)
-      data = Render.live ? request(endpoint) : options
-      { title.to_sym => serialize(data) }
+      response = Render.live ? request(endpoint) : options
+      # data = (response.is_a?(Hash) ? (response[title.to_sym] || response) : response)
+      self.data = DottableHash.new({ title.to_sym => serialize(response) })
     end
 
-    def serialize(data)
-      # data.is_a?(Array) ? to_array(data) : to_hash(data)
-      (type == Array) ? to_array(data) : to_hash(data)
+    def serialize(data = nil)
+      if (type == Array)
+        array_attribute.serialize(data)
+      else
+        hash_attributes.inject({}) do |processed_data, attribute|
+          data ||= {}
+          value = data.fetch(attribute.name, nil)
+          serialized_attribute = attribute.serialize(value)
+          processed_data.merge!(serialized_attribute)
+        end
+      end
     end
 
     private
 
-    def find_schema(title)
-      loaded_schema = Render.schemas[title.to_sym]
-      raise Errors::Schema::NotFound.new(title) if !loaded_schema
-      loaded_schema
-    end
-
+    # TODO Make this configurable via a proc
     def request(endpoint)
       response = Net::HTTP.get_response(URI(endpoint)) # TODO Custom requests
       if response.kind_of?(Net::HTTPSuccess)
-        response = JSON.parse(response.body).recursive_symbolize_keys!
-        if (response.is_a?(Array) || (response[title.to_sym] == nil))
-          response
-        else
-          response[title.to_sym]
-        end
+        JSON.parse(response.body).recursive_symbolize_keys!
       else
-        raise Errors::Schema::RequestError.new(endpoint, response)
+        raise Errors::Definition::RequestError.new(endpoint, response)
       end
     rescue JSON::ParserError => error
-      raise Errors::Schema::InvalidResponse.new(endpoint, response.body)
-    end
-
-    def to_array(items)
-      # items.first.is_a?(Hash) ? to_array_of_schemas(items) : to_array_of_items(items)
-      properties.first.schema_value? ? to_array_of_schemas(items) : to_array_of_items(items)
-    end
-
-    def to_array_of_items(items)
-      (items = stubbed_array) if !Render.live && (!items || items.empty?)
-      archetype = properties.first # there should only be one in the event that it's an array schema
-      items.collect do |element|
-        archetype.serialize(element)
-      end
-    end
-
-    def to_array_of_schemas(items)
-      (items = stubbed_array) if !Render.live && (!items || items.empty?)
-      items.collect do |element|
-        properties.inject({}) do |properties, attribute|
-          properties.merge(attribute.to_hash(element)).values.first
-        end
-      end
-    end
-
-    def to_hash(explicit_values = {})
-      explicit_values ||= {} # !Render.live check
-      properties.inject({}) do |accum, attribute|
-        explicit_value = explicit_values[attribute.name]
-        hash = attribute.to_hash(explicit_value)
-        accum.merge(hash)
-      end
+      raise Errors::Definition::InvalidResponse.new(endpoint, response.body)
     end
 
     def stubbed_array
