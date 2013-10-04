@@ -38,10 +38,14 @@ module Render
     private
 
     def faux_array_data
-      lower_limit = (required ? 1 : 0)
       rand(lower_limit..FAUX_DATA_UPPER_LIMIT).times.collect do
         archetype ? nil : {}
       end
+    end
+
+    def lower_limit
+      # lower_limit = (required ? 1 : 0)
+      1
     end
 
   end
