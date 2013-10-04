@@ -20,10 +20,10 @@ module Render
     end
 
     def serialize(explicit_values)
-      explicit_values = faux_array_data if (Render.live == false)
+      explicit_values = faux_array_data if (Render.live == false && explicit_values.empty?)
       if archetype
         explicit_values.collect do |value|
-          Render.live ? value : faux_value
+          Render.live ? value : (value || faux_value)
         end
       else
         explicit_values.collect do |value|

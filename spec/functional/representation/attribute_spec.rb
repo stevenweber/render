@@ -17,12 +17,12 @@ module Render
         generator = Generator.new({ type: String, matcher: %r{.*name.*}, algorithm: proc { name } })
         Render.generators << generator
 
-        Attribute.new({ name: { type: String } }).default_value.should == name
+        HashAttribute.new({ name: { type: String } }).default_value.should == name
       end
 
       it "uses really bare-boned type if no generator is found" do
         bare_boned_string = "A String"
-        Attribute.new({ foo: { type: String } }).default_value.should == bare_boned_string
+        HashAttribute.new({ foo: { type: String } }).default_value.should == bare_boned_string
       end
     end
   end

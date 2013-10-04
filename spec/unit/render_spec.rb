@@ -49,6 +49,7 @@ describe Render do
 
     describe ".load_schemas!" do
       before(:each) do
+        Render.definitions.clear
         @schema_title = "film"
         @json_schema = <<-JSON
           {
@@ -68,19 +69,19 @@ describe Render do
       end
 
       after(:each) do
-        Render.schemas = {}
+        Render.definitions = {}
       end
 
       it "stores JSON files" do
         expect {
-          Render.load_schemas!(@directory)
-        }.to change { Render.schemas.keys.size }.by(1)
+          Render.load_definitions!(@directory)
+        }.to change { Render.definitions.keys.size }.by(1)
       end
 
       it "accesses parsed schemas with symbols" do
-        Render.load_schemas!(@directory)
+        Render.load_definitions!(@directory)
         parsed_json = JSON.parse(@json_schema).recursive_symbolize_keys!
-        Render.schemas[@schema_title.to_sym].should == parsed_json
+        Render.definitions[@schema_title.to_sym].should == parsed_json
       end
     end
   end

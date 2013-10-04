@@ -2,11 +2,11 @@ require "render"
 
 describe Render do
   before(:all) do
-    Render.load_schemas!(Helpers::SCHEMA_DIRECTORY)
+    Render.load_definitions!(Helpers::SCHEMA_DIRECTORY)
   end
 
   after(:all) do
-    Render.schemas = {}
+    Render.definitions = {}
   end
 
   describe "request" do
