@@ -59,9 +59,8 @@ module Render
       end
     end
 
-    def fetch(key)
+    def fetch(key, *args)
       key = key.to_sym
-      raise KeyError.new("Invalid key: #{key}") unless has_key?(key)
       super
     end
 

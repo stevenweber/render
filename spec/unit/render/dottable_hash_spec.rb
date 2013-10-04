@@ -127,12 +127,6 @@ module Render
     end
 
     describe "#fetch" do
-      it "raises KeyErrors" do
-        lambda {
-          DottableHash.new.fetch("non_existent_key")
-        }.should raise_error
-      end
-
       it "returns dottable_hashs in lieu of hashes" do
         @dottable_hash["nested_hash"] = { "foo" => "bar" }
         @dottable_hash.fetch("nested_hash").class.should == DottableHash
@@ -143,6 +137,9 @@ module Render
         @dottable_hash.fetch("foo").should == "bar"
       end
 
+      it "accepts default value" do
+        DottableHash.new({ baz: "buz" }).fetch(:foo, :bar).should == :bar
+      end
     end
 
     describe "#fetch_path[!]" do
