@@ -2,11 +2,14 @@ require "render/attribute"
 
 module Render
   class ArrayAttribute < Attribute
+    FAUX_DATA_UPPER_LIMIT = 5.freeze
+
     attr_accessor :archetype
 
     def initialize(options = {})
       super
 
+      self.name = options.fetch(:title, :render_array_attribute_untitled).to_sym
       options = options[:items]
       self.type = Render.parse_type(options[:type])
       self.format = Render.parse_type(options[:format])
@@ -19,11 +22,11 @@ module Render
       end
     end
 
-    def serialize(explicit_values)
-      explicit_values = faux_array_data if (Render.live == false && explicit_values.empty?)
+    def serialize(explicit_values = nil)
+      explicit_values = faux_array_data if (Render.live == false && explicit_values.nil?)
       if archetype
         explicit_values.collect do |value|
-          Render.live ? value : (value || faux_value)
+          value || default_value
         end
       else
         explicit_values.collect do |value|
@@ -36,8 +39,7 @@ module Render
 
     def faux_array_data
       lower_limit = (required ? 1 : 0)
-      upper_limit = 5
-      rand(lower_limit..upper_limit).times.collect do
+      rand(lower_limit..FAUX_DATA_UPPER_LIMIT).times.collect do
         archetype ? nil : {}
       end
     end
