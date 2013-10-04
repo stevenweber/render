@@ -6,81 +6,52 @@ module Render
       Render.stub({ live: false })
     end
 
-    it "parses hash data" do
-      schema = Schema.new({
-        title: "television",
-        type: Object,
-        properties: {
-          brand: { type: String }
-        }
-      })
-
-      brand_name = "Sony"
-      response = { brand: brand_name }
-
-      schema.render(response).should == {
-        television: { brand: brand_name }
-      }
-    end
-
-    it "parses simple arrays" do
-      schema = Schema.new({
-        title: "televisions",
-        type: Array,
-        items: {
-          type: UUID
-        }
-      })
-
-      television_ids = rand(10).times.collect { UUID.generate }
-
-      schema.render(television_ids).should == {
-        televisions: television_ids
-      }
-    end
-
-    it "parses arrays of objects" do
-      schema = Schema.new({
-        title: :televisions,
-        type: Array,
-        items: {
-          title: :television,
+    describe "#serialize" do
+      it "returns data from hashes" do
+        definition = {
+          title: "film",
           type: Object,
           properties: {
-            brand: { type: String }
-          }
-        }
-      })
-
-      brand_1, brand_2 = *%w(Sony Samsung)
-      response = [{ brand: brand_1 }, { brand: brand_2 }]
-
-      schema.render(response).should == {
-        televisions: [{ brand: brand_1 }, { brand: brand_2 }]
-      }
-    end
-
-    it "parses nested object data" do
-      schema = Schema.new({
-        title: :television,
-        type: Object,
-        properties: {
-          brand: {
-            title: :brand,
-            type: Object,
-            properties: {
-              name: { type: String }
+            title: {
+              type: String
             }
           }
         }
-      })
+        data = { title: "a name" }
+        Schema.new(definition).serialize(data).should == data
+      end
 
-      brand_name = "Sony"
-      response = { brand: { name: brand_name } }
 
-      schema.render(response).should == {
-        television: { brand: { name: brand_name } }
-      }
+      it "returns data from arrays" do
+        definition = {
+          title: "names",
+          type: Array,
+          items: {
+            type: String
+          }
+        }
+        schema = Schema.new(definition)
+        names = ["bob", "bill"]
+        schema.serialize(names).should == names
+      end
+
+      it "returns data from arrays of schemas" do
+        definition = {
+          title: "films",
+          type: Array,
+          items: {
+            type: Object,
+            properties: {
+              id: { type: UUID }
+            }
+          }
+        }
+
+        the_id = UUID.generate
+        films = [{ id: the_id }]
+        schema = Schema.new(definition)
+        schema.serialize(films).should == films
+      end
     end
   end
 end

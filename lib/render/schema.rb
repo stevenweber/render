@@ -22,23 +22,17 @@ module Render
     def initialize(definition_or_title)
       Render.logger.debug("Loading #{definition_or_title}")
       self.definition = Render.definitions.fetch(definition_or_title, definition_or_title)
-      self.title = definition[:title].to_sym rescue :untitled
+      title_or_default = definition.fetch(:title, "untitled")
+      self.title = title_or_default.to_sym
       self.type = Render.parse_type(definition[:type])
 
-      if (type == Array)
+      if definition.keys.include?(:items)
         self.array_attribute = ArrayAttribute.new(definition)
       else
         self.hash_attributes = definition.fetch(:properties).collect do |name, attribute_definition|
           HashAttribute.new({ name => attribute_definition })
         end
       end
-    end
-
-    def render(options = {})
-      endpoint = options.delete(:endpoint)
-      response = Render.live ? request(endpoint) : options
-      # data = (response.is_a?(Hash) ? (response[title.to_sym] || response) : response)
-      self.data = DottableHash.new({ title.to_sym => serialize(response) })
     end
 
     def serialize(data = nil)
@@ -54,6 +48,13 @@ module Render
       end
     end
 
+    def render(options = {})
+      endpoint = options.delete(:endpoint)
+      response = Render.live ? request(endpoint) : options
+      data = (response.is_a?(Hash) ? (response[title.to_sym] || response) : response)
+      self.data = DottableHash.new({ title.to_sym => serialize(data) })
+    end
+
     private
 
     # TODO Make this configurable via a proc
@@ -62,10 +63,10 @@ module Render
       if response.kind_of?(Net::HTTPSuccess)
         JSON.parse(response.body).recursive_symbolize_keys!
       else
-        raise Errors::Definition::RequestError.new(endpoint, response)
+        raise Errors::Schema::RequestError.new(endpoint, response)
       end
     rescue JSON::ParserError => error
-      raise Errors::Definition::InvalidResponse.new(endpoint, response.body)
+      raise Errors::Schema::InvalidResponse.new(endpoint, response.body)
     end
 
     def stubbed_array

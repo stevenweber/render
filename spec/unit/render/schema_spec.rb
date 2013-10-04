@@ -56,128 +56,138 @@ module Render
     end
 
     describe "#serialize" do
-      it "returns data from hashes" do
+      it "returns serialized array" do
         definition = {
-          title: "film",
+          type: Array,
+          items: {
+            type: UUID
+          }
+        }
+        schema = Schema.new(definition)
+        schema.array_attribute.should_receive(:serialize).with(nil).and_return([:data])
+        schema.serialize.should == [:data]
+      end
+
+      it "returns serialized hash" do
+        definition = {
           type: Object,
           properties: {
-            title: {
-              type: String
-            }
-          }
-        }
-        data = { title: "a name" }
-        Schema.new(definition).serialize(data).should == data
-      end
-
-
-      it "returns data from arrays" do
-        definition = {
-          title: "names",
-          type: Array,
-          items: {
-            type: String
+            title: { type: String }
           }
         }
         schema = Schema.new(definition)
-        names = ["bob", "bill"]
-        schema.serialize(names).should == names
+        schema.hash_attributes.first.should_receive(:serialize).with(nil).and_return({ title: "foo" })
+        schema.serialize.should == { title: "foo" }
       end
+    end
 
-      it "returns data from arrays of schemas" do
-        definition = {
-          title: "films",
-          type: Array,
-          items: {
-            type: Object,
+    describe "#render" do
+      context "live" do
+        before(:all) do
+          @original_defs = Render.definitions
+          Render.load_definition!({
+            title: :film,
             properties: {
-              id: { type: UUID }
+              genre: { type: String }
+            }
+          })
+        end
+
+        after(:all) do
+          Render.definitions = @original_defs
+        end
+
+        it "returns attribute data from endpoint" do
+          endpoint = "http://endpoint.local"
+          genre = "The Shining"
+          data = { genre: genre }
+          response = { status: 200, body: data.to_json }
+          stub_request(:get, endpoint).to_return(response)
+
+          schema = Schema.new(:film)
+          schema.hash_attributes.first.should_receive(:serialize).with(genre).and_return({ genre: genre })
+
+          schema.render({ endpoint: endpoint }).should == { film: data }
+        end
+
+        it "raises error if endpoint does not return a 2xx" do
+          endpoint = "http://endpoint.local"
+          stub_request(:get, endpoint).to_return({ status: 403 })
+
+          expect {
+            schema = Schema.new(:film)
+            schema.render({ endpoint: endpoint })
+          }.to raise_error(Errors::Schema::RequestError)
+        end
+
+        it "returns meaningful error when response contains invalid JSON" do
+          endpoint = "http://enpoint.local"
+          stub_request(:get, endpoint).to_return({ body: "Server Error: 500" })
+
+          expect {
+            Schema.new(:film).render({ endpoint: endpoint })
+          }.to raise_error(Errors::Schema::InvalidResponse)
+        end
+      end
+
+      context "faked" do
+        before(:each) do
+          Render.stub({ live: false })
+        end
+
+        it "returns schema with fake values" do
+          definition = {
+            title: :film,
+            properties: {
+              title: { type: String }
+            }
+          }
+          schema = Schema.new(definition)
+          film = schema.render[:film]
+          film[:title].should be_a(String)
+        end
+      end
+
+      it "handles responses that use definition title as root key" do
+        definition = {
+          title: :film,
+          properties: {
+            genre: { type: String }
+          }
+        }
+        endpoint = "http://endpoint.local"
+        data = { film: { genre: "the genre" } }
+        response = { status: 200, body: data.to_json }
+        stub_request(:get, endpoint).to_return(response)
+
+        film = Schema.new(definition)
+        film.render({ endpoint: endpoint }).should == data
+      end
+
+      it "handles Array responses" do
+        definition = {
+          title: :films,
+          type: Array,
+          items: {
+            title: :film,
+            properties: {
+              name: { type: String }
             }
           }
         }
-
-        the_id = UUID.generate
-        films = [{ id: the_id }]
         schema = Schema.new(definition)
-        schema.serialize(films).should == films
+
+        endpoint = "http://endpoint.local"
+        first_name = "The Shining"
+        second_name = "Eyes Wide Shut"
+        data = [
+          { name: first_name },
+          { name: second_name }
+        ]
+        stub_request(:get, endpoint).to_return({ status: 200, body: data.to_json })
+
+        schema.render({ endpoint: endpoint }).should == { films: data }
       end
     end
   end
-
-  describe "#render" do
-    context "live" do
-      it "returns schema with values from endpoint" do
-        endpoint = "http://endpoint.local"
-        name = "The Shining"
-        genre = "Horror"
-        response_body = { film: { name: name, genre: genre } }
-        response = { status: 200, body: response_body.to_json }
-        stub_request(:get, endpoint).to_return(response)
-
-        film = Schema.new(@film_schema)
-        film.render({ endpoint: endpoint }).should == response_body
-      end
-
-      it "raises error if response is not 2xx" do
-        endpoint = "http://endpoint.local"
-        response = { status: 403, body: "OMGWTFBBQ" }
-        stub_request(:get, endpoint).to_return(response)
-
-        expect {
-          film = Schema.new(@film_schema)
-          film.render({ endpoint: endpoint })
-        }.to raise_error(Errors::Schema::RequestError)
-      end
-
-      it "returns meaningful error when response contains invalid JSON" do
-        endpoint = "http://enpoint.local"
-        stub_request(:get, endpoint).to_return({ body: "Server Error: 500" })
-
-        expect {
-          Schema.new(@film_schema).render({ endpoint: endpoint })
-        }.to raise_error(Errors::Schema::InvalidResponse)
-      end
-    end
-
-    context "faked" do
-      before(:each) do
-        Render.stub({ live: false })
-      end
-
-      it "returns schema with fake values" do
-        film = Schema.new(@film_schema)
-        film = film.render[:film]
-        film[:name].should be_a(String)
-        film[:genre].should be_a(String)
-      end
-    end
-
-    it "handles responses that do not use schema title as root key" do
-      endpoint = "http://endpoint.local"
-      response_body = { name: "the name", genre: "the genre" }
-      response = { status: 200, body: response_body.to_json }
-      stub_request(:get, endpoint).to_return(response)
-
-      film = Schema.new(@film_schema)
-      film.render({ endpoint: endpoint }).should == { film: response_body }
-    end
-
-    it "handles Array responses" do
-      endpoint = "http://endpoint.local"
-      first_name = "The Shining"
-      second_name = "Eyes Wide Shut"
-      genre = "Horror"
-
-      response_body = [
-        { name: first_name, genre: genre },
-        { name: second_name, genre: genre }
-      ]
-      response = { status: 200, body: response_body.to_json }
-      stub_request(:get, endpoint).to_return(response)
-
-      film = Schema.new(@films_schema)
-      film.render({ endpoint: endpoint }).should == { films: response_body }
-    end
-  end
-
 end
