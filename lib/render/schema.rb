@@ -48,9 +48,8 @@ module Render
       end
     end
 
-    def render(options = {})
-      endpoint = options.delete(:endpoint)
-      response = Render.live ? request(endpoint) : options
+    def render(options = nil)
+      response = Render.live ? request(options.delete(:endpoint)) : options
       data = (response.is_a?(Hash) ? (response[title.to_sym] || response) : response)
       self.data = DottableHash.new({ title.to_sym => serialize(data) })
     end

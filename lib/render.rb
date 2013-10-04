@@ -45,7 +45,7 @@ module Render
         return UUID if type == "uuid"
         return Boolean if type == "boolean"
         return Float if type == "number"
-        return Time if type == "date-time"
+        return Time if type.match(/date.*time/i)
         Object.const_get(type.capitalize)
       else
         type
