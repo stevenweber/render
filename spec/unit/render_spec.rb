@@ -47,6 +47,32 @@ describe Render do
       end
     end
 
+    describe ".load_defintion!" do
+      before(:each) do
+        @original_defs = Render.definitions
+      end
+
+      after(:each) do
+        Render.definitions = @original_defs
+      end
+
+      it "preferences #universal_title over title" do
+        universal_title = "a_service_films_show"
+        definition = {
+          universal_title: universal_title,
+          title: "film",
+          type: Object,
+          properties: {
+            name: { type: String },
+            year: { type: Integer }
+          }
+        }
+
+        Render.load_definition!(definition)
+        Render.definitions.keys.should include(universal_title.to_sym)
+      end
+    end
+
     describe ".load_schemas!" do
       before(:each) do
         Render.definitions.clear

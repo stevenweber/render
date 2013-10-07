@@ -35,7 +35,7 @@ module Render
     end
 
     def load_definition!(definition)
-      title = definition.fetch(:title).to_sym
+      title = definition.fetch(:universal_title, definition.fetch(:title)).to_sym
       self.definitions[title] = definition
     end
 
