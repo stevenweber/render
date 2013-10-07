@@ -4,6 +4,14 @@ module Render
   describe Schema do
     describe "#initialize" do
       describe "#definition" do
+        before(:all) do
+          @original_defs = Render.definitions
+        end
+
+        after(:all) do
+          Render.definitions = @original_defs
+        end
+
         it "is set from argument" do
           schema_definition = { properties: {} }
           Schema.new(schema_definition).definition.should == schema_definition
@@ -15,6 +23,8 @@ module Render
           Render.load_definition!(definition)
           Schema.new(definition_title).definition.should == definition
         end
+
+        it "raises an error if definition is not found and argument is not a schema"
       end
 
       it "sets its type from schema" do
@@ -82,112 +92,79 @@ module Render
     end
 
     describe "#render" do
-      context "live" do
-        before(:all) do
-          @original_defs = Render.definitions
-          Render.load_definition!({
-            title: :film,
-            properties: {
-              genre: { type: String }
-            }
-          })
-        end
-
-        after(:all) do
-          Render.definitions = @original_defs
-        end
-
-        it "returns attribute data from endpoint" do
-          endpoint = "http://endpoint.local"
-          genre = "The Shining"
-          data = { genre: genre }
-          response = { status: 200, body: data.to_json }
-          stub_request(:get, endpoint).to_return(response)
-
-          schema = Schema.new(:film)
-          schema.hash_attributes.first.should_receive(:serialize).with(genre).and_return({ genre: genre })
-
-          schema.render({ endpoint: endpoint }).should == { film: data }
-        end
-
-        it "raises error if endpoint does not return a 2xx" do
-          endpoint = "http://endpoint.local"
-          stub_request(:get, endpoint).to_return({ status: 403 })
-
-          expect {
-            schema = Schema.new(:film)
-            schema.render({ endpoint: endpoint })
-          }.to raise_error(Errors::Schema::RequestError)
-        end
-
-        it "returns meaningful error when response contains invalid JSON" do
-          endpoint = "http://enpoint.local"
-          stub_request(:get, endpoint).to_return({ body: "Server Error: 500" })
-
-          expect {
-            Schema.new(:film).render({ endpoint: endpoint })
-          }.to raise_error(Errors::Schema::InvalidResponse)
-        end
-      end
-
-      context "faked" do
-        before(:each) do
-          Render.stub({ live: false })
-        end
-
-        it "returns schema with fake values" do
-          definition = {
-            title: :film,
-            properties: {
-              title: { type: String }
-            }
-          }
-          schema = Schema.new(definition)
-          film = schema.render[:film]
-          film[:title].should be_a(String)
-        end
-      end
-
-      it "handles responses that use definition title as root key" do
-        definition = {
+      before(:all) do
+        @original_defs = Render.definitions
+        Render.load_definition!({
           title: :film,
           properties: {
             genre: { type: String }
           }
-        }
+        })
+      end
+
+      after(:all) do
+        Render.definitions = @original_defs
+      end
+
+      it "sets #raw_data from endpoint" do
+        schema = Schema.new(:film)
+        schema.stub({ request: { response: :body } })
+        schema.render
+        schema.raw_data.should == { response: :body }
+      end
+
+      it "sets #raw_data from explicit data when offline" do
+        Render.stub({ live: false })
+        schema = Schema.new(:film)
+        schema.render({ explicit: :value })
+        schema.raw_data.should == { explicit: :value }
+      end
+
+      it "returns serialized data" do
         endpoint = "http://endpoint.local"
-        data = { film: { genre: "the genre" } }
+        genre = "The Shining"
+        data = { genre: genre }
         response = { status: 200, body: data.to_json }
         stub_request(:get, endpoint).to_return(response)
 
-        film = Schema.new(definition)
-        film.render({ endpoint: endpoint }).should == data
+        schema = Schema.new(:film)
+        schema.hash_attributes.first.should_receive(:serialize).with(genre).and_return({ genre: genre })
+
+        schema.render({ endpoint: endpoint }).should == { film: data }
       end
 
-      it "handles Array responses" do
+      it "raises error if endpoint does not return a 2xx" do
+        endpoint = "http://endpoint.local"
+        stub_request(:get, endpoint).to_return({ status: 403 })
+
+        expect {
+          schema = Schema.new(:film)
+          schema.render({ endpoint: endpoint })
+        }.to raise_error(Errors::Schema::RequestError)
+      end
+
+      it "returns meaningful error when response contains invalid JSON" do
+        endpoint = "http://enpoint.local"
+        stub_request(:get, endpoint).to_return({ body: "Server Error: 500" })
+
+        expect {
+          Schema.new(:film).render({ endpoint: endpoint })
+        }.to raise_error(Errors::Schema::InvalidResponse)
+      end
+
+      it "nests data under #universal_title when available" do
+        Render.stub({ live: false })
         definition = {
-          title: :films,
-          type: Array,
-          items: {
-            title: :film,
-            properties: {
-              name: { type: String }
-            }
+          title: :film,
+          universal_title: :imdb_films_show,
+          properties: {
+            genre: { type: String }
           }
         }
-        schema = Schema.new(definition)
-
-        endpoint = "http://endpoint.local"
-        first_name = "The Shining"
-        second_name = "Eyes Wide Shut"
-        data = [
-          { name: first_name },
-          { name: second_name }
-        ]
-        stub_request(:get, endpoint).to_return({ status: 200, body: data.to_json })
-
-        schema.render({ endpoint: endpoint }).should == { films: data }
+        Schema.new(definition).render.should have_key(:imdb_films_show)
       end
+
+      it "uses configured request logic"
     end
   end
 end

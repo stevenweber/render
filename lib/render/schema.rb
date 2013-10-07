@@ -16,7 +16,8 @@ module Render
       :definition,
       :array_attribute,
       :hash_attributes,
-      :data
+      :raw_data,
+      :universal_title
 
     # TODO When given { ids: [1,2] }, parental_mapping { ids: id } means to make 2 calls
     def initialize(definition_or_title)
@@ -25,6 +26,7 @@ module Render
       title_or_default = definition.fetch(:title, "untitled")
       self.title = title_or_default.to_sym
       self.type = Render.parse_type(definition[:type])
+      self.universal_title = definition.fetch(:universal_title, nil)
 
       if definition.keys.include?(:items)
         self.array_attribute = ArrayAttribute.new(definition)
@@ -35,30 +37,42 @@ module Render
       end
     end
 
-    def serialize(data = nil)
+    def serialize(explicit_data = nil)
       if (type == Array)
-        array_attribute.serialize(data)
+        array_attribute.serialize(explicit_data)
       else
-        hash_attributes.inject({}) do |processed_data, attribute|
-          data ||= {}
-          value = data.fetch(attribute.name, nil)
+        hash_attributes.inject({}) do |processed_explicit_data, attribute|
+          explicit_data ||= {}
+          value = explicit_data.fetch(attribute.name, nil)
           serialized_attribute = attribute.serialize(value)
-          processed_data.merge!(serialized_attribute)
+          processed_explicit_data.merge!(serialized_attribute)
         end
       end
     end
 
-    def render(options = nil)
-      response = Render.live ? request(options.delete(:endpoint)) : options
-      data = (response.is_a?(Hash) ? (response[title.to_sym] || response) : response)
-      self.data = DottableHash.new({ title.to_sym => serialize(data) })
+    def render(options_and_explicit_data = nil)
+      endpoint = options_and_explicit_data.delete(:endpoint) if options_and_explicit_data.is_a?(Hash)
+      self.raw_data = Render.live ? request(endpoint) : options_and_explicit_data
+      processed_data = serialize(biased_data)
+      DottableHash.new(hash_with_title_prefixes(processed_data))
     end
 
     private
 
-    # TODO Make this configurable via a proc
+    def hash_with_title_prefixes(data)
+      if universal_title
+        { universal_title => { title => data } }
+      else
+        { title => data }
+      end
+    end
+
     def request(endpoint)
-      response = Net::HTTP.get_response(URI(endpoint)) # TODO Custom requests
+      default_request(endpoint)
+    end
+
+    def default_request(endpoint)
+      response = Net::HTTP.get_response(URI(endpoint))
       if response.kind_of?(Net::HTTPSuccess)
         JSON.parse(response.body).recursive_symbolize_keys!
       else
@@ -68,10 +82,13 @@ module Render
       raise Errors::Schema::InvalidResponse.new(endpoint, response.body)
     end
 
-    def stubbed_array
-      items = []
-      rand(1..3).times { items << nil }
-      items
+    def biased_data
+      data_uses_title_as_root_key? ? raw_data.fetch(title) : raw_data
     end
+
+    def data_uses_title_as_root_key?
+      raw_data.is_a?(Hash) && raw_data.has_key?(title)
+    end
+
   end
 end
