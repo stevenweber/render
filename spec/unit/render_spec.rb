@@ -47,7 +47,7 @@ describe Render do
       end
     end
 
-    describe ".load_defintion!" do
+    context "schema definitions" do
       before(:each) do
         @original_defs = Render.definitions
       end
@@ -56,28 +56,29 @@ describe Render do
         Render.definitions = @original_defs
       end
 
-      it "preferences #universal_title over title" do
-        universal_title = "a_service_films_show"
-        definition = {
-          universal_title: universal_title,
-          title: "film",
-          type: Object,
-          properties: {
-            name: { type: String },
-            year: { type: Integer }
+      describe ".load_defintion!" do
+        it "preferences #universal_title over title" do
+          universal_title = "a_service_films_show"
+          definition = {
+            universal_title: universal_title,
+            title: "film",
+            type: Object,
+            properties: {
+              name: { type: String },
+              year: { type: Integer }
+            }
           }
-        }
 
-        Render.load_definition!(definition)
-        Render.definitions.keys.should include(universal_title.to_sym)
+          Render.load_definition!(definition)
+          Render.definitions.keys.should include(universal_title.to_sym)
+        end
       end
-    end
 
-    describe ".load_schemas!" do
-      before(:each) do
-        Render.definitions.clear
-        @schema_title = "film"
-        @json_schema = <<-JSON
+      describe ".load_schemas!" do
+        before(:each) do
+          Render.definitions.clear
+          @schema_title = "film"
+          @json_schema = <<-JSON
           {
             "title": "#{@schema_title}",
             "type": "object",
@@ -86,28 +87,45 @@ describe Render do
               "year": { "type": "integer" }
             }
           }
-        JSON
+          JSON
 
-        @directory = "/a"
-        @schema_file = "/a/schema.json"
-        Dir.stub(:glob).with(%r{#{@directory}}).and_return([@schema_file])
-        IO.stub(:read).with(@schema_file).and_return(@json_schema)
-      end
+          @directory = "/a"
+          @schema_file = "/a/schema.json"
+          Dir.stub(:glob).with(%r{#{@directory}}).and_return([@schema_file])
+          IO.stub(:read).with(@schema_file).and_return(@json_schema)
+        end
 
-      after(:each) do
-        Render.definitions = {}
-      end
+        after(:each) do
+          Render.definitions = {}
+        end
 
-      it "stores JSON files" do
-        expect {
+        it "stores JSON files" do
+          expect {
+            Render.load_definitions!(@directory)
+          }.to change { Render.definitions.keys.size }.by(1)
+        end
+
+        it "accesses parsed schemas with symbols" do
           Render.load_definitions!(@directory)
-        }.to change { Render.definitions.keys.size }.by(1)
+          parsed_json = JSON.parse(@json_schema).recursive_symbolize_keys!
+          Render.definitions[@schema_title.to_sym].should == parsed_json
+        end
+      end
+    end
+
+    describe ".definition" do
+      it "returns definition by its title" do
+        def_title = :the_name
+        definition = { title: def_title, properties: {} }
+        Render.load_definition!(definition)
+
+        Render.definition(def_title).should == definition
       end
 
-      it "accesses parsed schemas with symbols" do
-        Render.load_definitions!(@directory)
-        parsed_json = JSON.parse(@json_schema).recursive_symbolize_keys!
-        Render.definitions[@schema_title.to_sym].should == parsed_json
+      it "raises meaningful error if definition is not found" do
+        expect {
+          Render.definition(:definition_with_this_title_has_not_been_loaded)
+        }.to raise_error(Render::Errors::DefinitionNotFound)
       end
     end
   end

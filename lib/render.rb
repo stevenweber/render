@@ -39,6 +39,12 @@ module Render
       self.definitions[title] = definition
     end
 
+    def definition(title)
+      definitions.fetch(title.to_sym)
+    rescue KeyError => error
+      raise Errors::DefinitionNotFound.new(title)
+    end
+
     # TODO better type parsing
     def parse_type(type)
       if type.is_a?(String)

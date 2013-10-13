@@ -28,19 +28,19 @@ module Render
       end
     end
 
-    class Schema
-      class DefinitionNotFound < StandardError
-        attr_accessor :title
+    class DefinitionNotFound < StandardError
+      attr_accessor :title
 
-        def initialize(title)
-          self.title = title
-        end
-
-        def to_s
-          "Schema with title #{title} is not loaded"
-        end
+      def initialize(title)
+        self.title = title
       end
 
+      def to_s
+        "Schema with title #{title} is not loaded"
+      end
+    end
+
+    class Schema
       class RequestError < StandardError
         attr_accessor :endpoint, :response
 

@@ -11,6 +11,8 @@ require "render/dottable_hash"
 
 module Render
   class Schema
+    DEFAULT_TITLE = "untitled".freeze
+
     attr_accessor :title,
       :type,
       :definition,
@@ -22,8 +24,9 @@ module Render
     # TODO When given { ids: [1,2] }, parental_mapping { ids: id } means to make 2 calls
     def initialize(definition_or_title)
       Render.logger.debug("Loading #{definition_or_title}")
-      self.definition = Render.definitions.fetch(definition_or_title, definition_or_title)
-      title_or_default = definition.fetch(:title, "untitled")
+
+      set_definition!(definition_or_title)
+      title_or_default = definition.fetch(:title, DEFAULT_TITLE)
       self.title = title_or_default.to_sym
       self.type = Render.parse_type(definition[:type])
       self.universal_title = definition.fetch(:universal_title, nil)
@@ -34,6 +37,14 @@ module Render
         self.hash_attributes = definition.fetch(:properties).collect do |name, attribute_definition|
           HashAttribute.new({ name => attribute_definition })
         end
+      end
+    end
+
+    def set_definition!(definition_or_title)
+      self.definition = if (definition_or_title.is_a?(Hash) && !definition_or_title.empty?)
+        definition_or_title
+      else
+        Render.definition(definition_or_title)
       end
     end
 
