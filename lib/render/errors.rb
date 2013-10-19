@@ -1,5 +1,17 @@
 module Render
   module Errors
+    class InvalidType < StandardError
+      attr_accessor :name
+
+      def initialize(name)
+        self.name = name
+      end
+
+      def to_s
+        "Cannot parse type: #{name}."
+      end
+    end
+
     class Generator
       class MalformedAlgorithm < StandardError
         attr_accessor :algorithm

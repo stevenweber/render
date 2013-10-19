@@ -6,6 +6,16 @@ module Render
       it "sets name to title for faux_value generators to match" do
         ArrayAttribute.new({ title: "ids", items: { type: UUID } }).name.should == :ids
       end
+
+      describe "#format" do
+        it "is set from options" do
+          ArrayAttribute.new({ items: { type: String, format: UUID } }).format.should == UUID
+        end
+
+        it "is nil for indeterminable types" do
+          ArrayAttribute.new({ items: { type: String, format: "random-iso-format" } }).format.should == nil
+        end
+      end
     end
 
     describe "archetype" do

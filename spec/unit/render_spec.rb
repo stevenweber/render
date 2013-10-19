@@ -128,5 +128,37 @@ describe Render do
         }.to raise_error(Render::Errors::DefinitionNotFound)
       end
     end
+
+    describe ".parse_type" do
+      it "returns constant for string" do
+        Render.parse_type("integer").should == Integer
+      end
+
+      it "returns argument when not a string" do
+        class Foo; end
+        Render.parse_type(Foo).should == Foo
+        Object.__send__(:remove_const, :Foo)
+      end
+
+      it "raises meaningful error for unmatched types" do
+        expect {
+          Render.parse_type("NotAClass")
+        }.to raise_error(Render::Errors::InvalidType)
+      end
+
+      describe "non-standard formats" do
+        it "maps regardless of capitalization" do
+          string_representations = %w(uuid UUID)
+          string_representations.each do |name|
+            Render.parse_type(name).should == UUID
+          end
+        end
+
+        it "returns UUID for uuid"
+        it "returns Boolean for boolean"
+        it "returns Float for number"
+        it "returns Time for date-time"
+      end
+    end
   end
 end

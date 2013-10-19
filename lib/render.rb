@@ -47,15 +47,15 @@ module Render
 
     # TODO better type parsing
     def parse_type(type)
-      if type.is_a?(String)
-        return UUID if type.match(/uuid/i)
-        return Boolean if type.match(/boolean/i)
-        return Float if type.match(/number/i)
-        return Time if type.match(/date.*time/i)
-        Object.const_get(type.capitalize)
-      else
-        type
-      end
+      return type unless type.is_a?(String)
+
+      return UUID if type.match(/uuid/i)
+      return Boolean if type.match(/boolean/i)
+      return Float if type.match(/number/i)
+      return Time if type.match(/date.*time/i)
+      Object.const_get(type.capitalize)
+    rescue NameError => error
+      raise Errors::InvalidType.new(type)
     end
   end
 

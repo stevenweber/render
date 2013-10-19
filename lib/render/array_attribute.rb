@@ -12,7 +12,7 @@ module Render
       self.name = options.fetch(:title, :render_array_attribute_untitled).to_sym
       options = options[:items]
       self.type = Render.parse_type(options[:type])
-      self.format = Render.parse_type(options[:format])
+      self.format = Render.parse_type(options[:format]) rescue nil
       self.enums = options[:enum]
 
       if options.keys.include?(:properties)

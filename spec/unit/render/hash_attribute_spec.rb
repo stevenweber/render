@@ -26,6 +26,16 @@ module Render
         end
       end
 
+      describe "#format" do
+        it "is set from options" do
+          HashAttribute.new({ key_name: { type: String, format: UUID } }).format.should == UUID
+        end
+
+        it "is nil for indeterminable types" do
+          HashAttribute.new({ key_name: { type: String, format: "random-iso-format" } }).format.should == nil
+        end
+      end
+
       describe "#schema" do
         it "is set to nil if its a regular attribute" do
           HashAttribute.new({ id: { type: UUID } }).schema.should == nil
