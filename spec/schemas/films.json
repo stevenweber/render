@@ -1,4 +1,5 @@
 {
+  "universal_title": "films_index",
   "title": "films",
   "type": "array",
   "items": {

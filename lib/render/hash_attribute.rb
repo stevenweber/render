@@ -26,7 +26,7 @@ module Render
 
     def serialize(explicit_value)
       if !!schema
-        value = schema.serialize(explicit_value)
+        value = schema.serialize!(explicit_value)
         { name.to_sym => value }
       else
         value = (explicit_value || default_value)

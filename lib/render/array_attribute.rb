@@ -30,7 +30,7 @@ module Render
         end
       else
         explicit_values.collect do |value|
-          schema.serialize(value)
+          schema.serialize!(value)
         end
       end
     end

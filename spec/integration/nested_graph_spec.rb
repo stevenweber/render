@@ -18,7 +18,8 @@ describe Render do
     end
 
     it "returns structured data for nested queries" do
-      stub_request(:get, @films_endpoint).to_return({ body: [{ id: @aquatic_id }, { id: @darjeeling_id }].to_json })
+      films_index_response = [{ id: @aquatic_id }, { id: @darjeeling_id }]
+      stub_request(:get, @films_endpoint).to_return({ body: films_index_response.to_json })
 
       aquatic_name = "The Life Aquatic with Steve Zissou"
       aquatic_uri = @film_endpoint.gsub(":id", @aquatic_id)
@@ -29,21 +30,24 @@ describe Render do
       stub_request(:get, darjeeling_uri).to_return({ body: { name: darjeeling_name }.to_json })
 
       options = {
-        graphs: [Render::Graph.new(:film, { endpoint: @film_endpoint, relationships: { id: :id }})],
+        graphs: [Render::Graph.new(:films_show, { endpoint: @film_endpoint, relationships: { id: :id }})],
         endpoint: @films_endpoint
       }
-      graph = Render::Graph.new(:films, options)
+      graph = Render::Graph.new(:films_index, options)
       graph.render.should == {
-        films: [
-          { name: aquatic_name, year: nil },
-          { name: darjeeling_name, year: nil }
+        films_index: {
+          films: films_index_response
+        },
+        films_show: [
+          { film: { name: aquatic_name, year: nil } },
+          { film: { name: darjeeling_name, year: nil } }
         ]
       }
+      graph.rendered_data.films_show.first.film.name.should == aquatic_name
     end
 
     it "makes subsequent calls from archetype array data" do
       pending
-
       stub_request(:get, @films_endpoint).to_return({ body: [@aquatic_id, @darjeeling_id].to_json })
 
       aquatic = @film_endpoint.gsub("id", @aquatic_id)

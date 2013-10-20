@@ -6,7 +6,7 @@ module Render
       Render.stub({ live: false })
     end
 
-    describe "#serialize" do
+    describe "#serialize!" do
       it "returns data from hashes" do
         definition = {
           title: "film",
@@ -18,7 +18,7 @@ module Render
           }
         }
         data = { title: "a name" }
-        Schema.new(definition).serialize(data).should == data
+        Schema.new(definition).serialize!(data).should == data
       end
 
 
@@ -32,7 +32,7 @@ module Render
         }
         schema = Schema.new(definition)
         names = ["bob", "bill"]
-        schema.serialize(names).should == names
+        schema.serialize!(names).should == names
       end
 
       it "returns data from arrays of schemas" do
@@ -50,7 +50,7 @@ module Render
         the_id = UUID.generate
         films = [{ id: the_id }]
         schema = Schema.new(definition)
-        schema.serialize(films).should == films
+        schema.serialize!(films).should == films
       end
     end
   end

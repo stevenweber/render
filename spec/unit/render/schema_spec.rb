@@ -65,7 +65,7 @@ module Render
       end
     end
 
-    describe "#serialize" do
+    describe "#serialize!" do
       it "returns serialized array" do
         definition = {
           type: Array,
@@ -75,7 +75,7 @@ module Render
         }
         schema = Schema.new(definition)
         schema.array_attribute.should_receive(:serialize).with(nil).and_return([:data])
-        schema.serialize.should == [:data]
+        schema.serialize!.should == [:data]
       end
 
       it "returns serialized hash" do
@@ -87,11 +87,11 @@ module Render
         }
         schema = Schema.new(definition)
         schema.hash_attributes.first.should_receive(:serialize).with(nil).and_return({ title: "foo" })
-        schema.serialize.should == { title: "foo" }
+        schema.serialize!.should == { title: "foo" }
       end
     end
 
-    describe "#render" do
+    describe "#render!" do
       before(:all) do
         @original_defs = Render.definitions
         Render.load_definition!({
@@ -109,14 +109,14 @@ module Render
       it "sets #raw_data from endpoint" do
         schema = Schema.new(:film)
         schema.stub({ request: { response: :body } })
-        schema.render
+        schema.render!
         schema.raw_data.should == { response: :body }
       end
 
       it "sets #raw_data from explicit data when offline" do
         Render.stub({ live: false })
         schema = Schema.new(:film)
-        schema.render({ explicit: :value })
+        schema.render!({ explicit: :value })
         schema.raw_data.should == { explicit: :value }
       end
 
@@ -130,7 +130,7 @@ module Render
         schema = Schema.new(:film)
         schema.hash_attributes.first.should_receive(:serialize).with(genre).and_return({ genre: genre })
 
-        schema.render({ endpoint: endpoint }).should == { film: data }
+        schema.render!({ endpoint: endpoint }).should == { film: data }
       end
 
       it "raises error if endpoint does not return a 2xx" do
@@ -139,7 +139,7 @@ module Render
 
         expect {
           schema = Schema.new(:film)
-          schema.render({ endpoint: endpoint })
+          schema.render!({ endpoint: endpoint })
         }.to raise_error(Errors::Schema::RequestError)
       end
 
@@ -148,7 +148,7 @@ module Render
         stub_request(:get, endpoint).to_return({ body: "Server Error: 500" })
 
         expect {
-          Schema.new(:film).render({ endpoint: endpoint })
+          Schema.new(:film).render!({ endpoint: endpoint })
         }.to raise_error(Errors::Schema::InvalidResponse)
       end
 
@@ -161,7 +161,7 @@ module Render
             genre: { type: String }
           }
         }
-        Schema.new(definition).render.should have_key(:imdb_films_show)
+        Schema.new(definition).render!.should have_key(:imdb_films_show)
       end
 
       it "uses configured request logic"
