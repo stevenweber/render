@@ -106,65 +106,85 @@ module Render
         Render.definitions = @original_defs
       end
 
-      it "sets #raw_data from endpoint" do
-        schema = Schema.new(:film)
-        schema.stub({ request: { response: :body } })
-        schema.render!
-        schema.raw_data.should == { response: :body }
-      end
-
-      it "sets #raw_data from explicit data when offline" do
-        Render.stub({ live: false })
-        schema = Schema.new(:film)
-        schema.render!({ explicit: :value })
-        schema.raw_data.should == { explicit: :value }
-      end
-
-      it "returns serialized data" do
-        endpoint = "http://endpoint.local"
-        genre = "The Shining"
-        data = { genre: genre }
-        response = { status: 200, body: data.to_json }
-        stub_request(:get, endpoint).to_return(response)
-
-        schema = Schema.new(:film)
-        schema.hash_attributes.first.should_receive(:serialize).with(genre).and_return({ genre: genre })
-
-        schema.render!({ endpoint: endpoint }).should == { film: data }
-      end
-
-      it "raises error if endpoint does not return a 2xx" do
-        endpoint = "http://endpoint.local"
-        stub_request(:get, endpoint).to_return({ status: 403 })
-
-        expect {
+      describe "#raw_data" do
+        it "is set from endpoint response" do
           schema = Schema.new(:film)
-          schema.render!({ endpoint: endpoint })
-        }.to raise_error(Errors::Schema::RequestError)
+          schema.stub({ request: { response: :body } })
+          schema.render!
+          schema.raw_data.should == { response: :body }
+        end
+
+        it "is set to explicit_data when offline" do
+          Render.stub({ live: false })
+          schema = Schema.new(:film)
+          schema.render!({ explicit: :value })
+          schema.raw_data.should == { explicit: :value }
+        end
+
+        it "is yielded" do
+          Render.stub({ live: false })
+          schema = Schema.new(:film)
+
+          data = { explicit: :value }
+          schema.should_receive(:serialize!).with(data)
+          schema.serialized_data = :serialized_data
+
+          expect { |a_block|
+            schema.render!(data, &a_block)
+          }.to yield_with_args(:serialized_data)
+        end
       end
 
-      it "returns meaningful error when response contains invalid JSON" do
-        endpoint = "http://enpoint.local"
-        stub_request(:get, endpoint).to_return({ body: "Server Error: 500" })
+      context "request" do
+        it "raises error if endpoint does not return a 2xx" do
+          endpoint = "http://endpoint.local"
+          stub_request(:get, endpoint).to_return({ status: 403 })
 
-        expect {
-          Schema.new(:film).render!({ endpoint: endpoint })
-        }.to raise_error(Errors::Schema::InvalidResponse)
+          expect {
+            schema = Schema.new(:film)
+            schema.render!({ endpoint: endpoint })
+          }.to raise_error(Errors::Schema::RequestError)
+        end
+
+        it "returns meaningful error when response contains invalid JSON" do
+          endpoint = "http://enpoint.local"
+          stub_request(:get, endpoint).to_return({ body: "Server Error: 500" })
+
+          expect {
+            Schema.new(:film).render!({ endpoint: endpoint })
+          }.to raise_error(Errors::Schema::InvalidResponse)
+        end
+
+        it "uses configured request logic"
       end
 
-      it "nests data under #universal_title when available" do
-        Render.stub({ live: false })
-        definition = {
-          title: :film,
-          universal_title: :imdb_films_show,
-          properties: {
-            genre: { type: String }
+      context "return value" do
+        it "is serialized data" do
+          endpoint = "http://endpoint.local"
+          genre = "The Shining"
+          data = { genre: genre }
+          response = { status: 200, body: data.to_json }
+          stub_request(:get, endpoint).to_return(response)
+
+          schema = Schema.new(:film)
+          schema.hash_attributes.first.should_receive(:serialize).with(genre).and_return({ genre: genre })
+
+          schema.render!({ endpoint: endpoint }).should == { film: data }
+        end
+
+        it "is serialized value nested under #universal_title" do
+          Render.stub({ live: false })
+          definition = {
+            title: :film,
+            universal_title: :imdb_films_show,
+            properties: {
+              genre: { type: String }
+            }
           }
-        }
-        Schema.new(definition).render!.should have_key(:imdb_films_show)
+          Schema.new(definition).render!.should have_key(:imdb_films_show)
+        end
       end
 
-      it "uses configured request logic"
     end
   end
 end
