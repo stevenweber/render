@@ -53,25 +53,37 @@ module Render
       self.inherited_data = inherited_properties
 
       graph_data = DottableHash.new
-      schema.render!(relationship_data_from_parent.merge({ endpoint: endpoint })) do |parent_data|
-        # TODO Thread support with configurable raises
-        # threads = []
-        graphs.each do |graph|
-          # threads << Thread.new do
-            if parent_data.is_a?(Array)
-              graph_data[graph.title] = parent_data.inject([]) do |nested_data, element|
-                nested_data << graph.render(element)[graph.title]
-              end
-            else
-              nested_data = graph.render(parent_data)
-              graph_data.merge!(data)
+      inherited_data = relationship_data_from_parent.merge({ endpoint: endpoint })
+      rendered_data = schema.render!(inherited_data) do |parent_data|
+        loop_with_configured_threading(graphs) do |graph|
+          if parent_data.is_a?(Array)
+            graph_data[graph.title] = parent_data.inject([]) do |nested_data, element|
+              nested_data << graph.render(element)[graph.title]
             end
-          # end
+          else
+            nested_data = graph.render(parent_data)
+            graph_data.merge!(nested_data)
+          end
         end
-        # threads.collect(&:join)
       end
 
-      self.rendered_data = graph_data.merge!(schema.rendered_data)
+      self.rendered_data = graph_data.merge!(rendered_data)
+    end
+
+    def loop_with_configured_threading(elements)
+      if Render.threading?
+        threads = []
+        elements.each do |element|
+          threads << Thread.new do
+            yield element
+          end
+        end
+        threads.collect(&:join)
+      else
+        elements.each do |element|
+          yield element
+        end
+      end
     end
 
     def title

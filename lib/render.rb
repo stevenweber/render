@@ -18,12 +18,18 @@ module Render
   @definitions = {}
   @generators = []
   @logger = ::Logger.new($stdout)
+  @threading = true
 
   class << self
     attr_accessor :live,
       :definitions,
       :generators,
-      :logger
+      :logger,
+      :threading
+
+    def threading?
+      threading == true
+    end
 
     def load_definitions!(directory)
       Dir.glob("#{directory}/**/*.json").each do |definition_file|

@@ -13,7 +13,7 @@ module Render
 
     describe ".initialize" do
       describe "#schema" do
-        it "is set to argument" do
+        it "is set from argument" do
           Schema.unstub(:new)
           schema = Schema.new({ title: :foo, properties: { name: { type: String } } })
           Graph.new(schema).schema.should == schema
@@ -121,9 +121,8 @@ module Render
             properties: { director_id: { type: UUID } }
           }
           @film_schema = Schema.new(film_definition)
-          @director_id = UUID.generate
-          @film_schema.stub({ render: { film: { director_id: @director_id } } })
 
+          @director_id = UUID.generate
           director_definition = {
             title: "director",
             type: Object,
@@ -132,22 +131,20 @@ module Render
           @director_schema = Schema.new(director_definition)
         end
 
-        it "merges nested graphs" do
-          serialized_data = { a: "attribute" }
-          pulled_data = { director: serialized_data }
-          @director_schema.stub({ render!: pulled_data, serialized_data: serialized_data })
+        it "includes nested graphs" do
           film = Graph.new(@film_schema, { graphs: [Graph.new(@director_schema)] })
-
           film = film.render
-          film[:film].should include(pulled_data)
+          film.keys.should =~ [:film, :director]
         end
 
         it "uses parent data to calculate endpoint" do
-          pending
           film = Graph.new(@film_schema)
           relationships = { director_id: :id }
           endpoint = "http://endpoint.local/directors/:id"
           film.graphs << Graph.new(@director_schema, { endpoint: endpoint, relationships: relationships })
+
+          film_data = { director_id: @director_id }
+          @film_schema.should_receive(:render!).and_yield(film_data).and_return(film_data)
 
           @director_schema.should_receive(:render!).with do |args|
             args[:endpoint].should == "http://endpoint.local/directors/#{@director_id}"
@@ -156,20 +153,35 @@ module Render
         end
 
         it "uses parent data to make multiple queries" do
-          pending
-          films_schema = Schema.new({ title: "films", type: Array, items: { properties: { id: { type: UUID } } } })
-          film_graph = Graph.new(@film_schema, { relationships: { id: :id } })
+          films_schema = Schema.new({
+            title: "films",
+            type: Array,
+            items: {
+              properties: {
+                id: { type: UUID }
+              }
+            }
+          })
+
+          film_graph = Graph.new(@film_schema, { relationships: { id: :director_id } })
           films = Graph.new(films_schema, { graphs: [film_graph] })
-          films.render.film_.should be_a(Array)
+
+          first_film_id = UUID.generate
+          second_film_id = UUID.generate
+          films_response = [{ id: first_film_id }, { id: second_film_id }]
+          films_schema.should_receive(:render!).and_yield(films_response).and_return({ films: films_response })
+
+          response = films.render
+          response.film.should be_a(Array)
+          response.film.should =~ [{ director_id: first_film_id }, { director_id: second_film_id }]
         end
 
         it "uses parent data for childrens' properties when explicitly used" do
-          pending
-          relationships = { director_id: :id }
-          director = Graph.new(@director_schema, { relationships: relationships })
+          director = Graph.new(@director_schema, { relationships: { director_id: :id } })
           film = Graph.new(@film_schema, { graphs: [director] })
+          @film_schema.should_receive(:render!).and_yield({ director_id: @director_id }).and_return({})
 
-          film.render.film.director.id.should == @director_id
+          film.render.director.id.should == @director_id
         end
       end
     end

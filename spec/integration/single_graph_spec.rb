@@ -24,8 +24,8 @@ describe Render do
       aquatic_uri = @films_endpoint.gsub(":secret_code", "secret_code=#{@secret_code}")
       stub_request(:get, aquatic_uri).to_return({ body: [{ id: @film_id }].to_json })
 
-      graph = Render::Graph.new(:films, { endpoint: @films_endpoint, secret_code: @secret_code })
-      graph.render.should == { films: [{ id: @film_id }] }
+      graph = Render::Graph.new(:films_index, { endpoint: @films_endpoint, secret_code: @secret_code })
+      graph.render.should == { films_index: { films: [{ id: @film_id }] } }
     end
 
     it "returns structured data for specific resources" do
@@ -33,8 +33,8 @@ describe Render do
       aquatic_uri = @film_endpoint.gsub(":id", id).gsub(":secret_code", "secret_code=#{@secret_code}")
       stub_request(:get, aquatic_uri).to_return({ body: { name: @film_name }.to_json })
 
-      graph = Render::Graph.new(:film, { id: id, endpoint: @film_endpoint, secret_code: @secret_code })
-      graph.render.should == { film: { name: @film_name, year: nil } }
+      graph = Render::Graph.new(:films_show, { id: id, endpoint: @film_endpoint, secret_code: @secret_code })
+      graph.render.should == { films_show: { film: { name: @film_name, year: nil } } }
     end
   end
 
@@ -44,23 +44,23 @@ describe Render do
     end
 
     it "use meaningful values" do
-      response = Render::Graph.new(:film).render({ name: @film_name })
+      response = Render::Graph.new(:films_show).render({ name: @film_name })
 
       stub_request(:post, "http://films.local/create").to_return({ body: response.to_json })
-      response = post_film(:anything)["film"]
+      response = post_film(:anything)["films_show"]["film"]
 
       response["name"].should be_a(String)
       response["year"].should be_a(Integer)
     end
 
     it "allows users to specify specific values" do
-      pending
-      response = Render::Graph.new(:film).render({ name: @film_name })
+      response = Render::Schema.new(:films_show).render!({ name: @film_name })
 
       data = { name: @film_name }.to_json
-      stub_request(:post, "http://films.local/create").with({ body: data }).to_return({ body: response.to_json })
-      response = post_film(data)["film"]
+      request = stub_request(:post, "http://films.local/create").with({ body: data }).to_return({ body: response.to_json })
 
+      response = post_film(data)["films_show"]["film"]
+      request.should have_been_made
       response["name"].should == @film_name
     end
   end
