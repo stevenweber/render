@@ -24,7 +24,11 @@ module Render
           Schema.new(definition_title).definition.should == definition
         end
 
-        it "raises an error if definition is not found and argument is not a schema"
+        it "raises an error if definition is not found and argument is not a schema" do
+          expect {
+            Schema.new(:does_not_exists)
+          }.to raise_error(Errors::DefinitionNotFound)
+        end
       end
 
       it "sets its type from schema" do

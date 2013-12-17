@@ -154,10 +154,21 @@ describe Render do
           end
         end
 
-        it "returns UUID for uuid"
-        it "returns Boolean for boolean"
-        it "returns Float for number"
-        it "returns Time for date-time"
+        it "returns UUID for uuid" do
+          Render.parse_type("uUId").should == UUID
+        end
+
+        it "returns Boolean for boolean" do
+          Render.parse_type("boolean").should == Boolean
+        end
+
+        it "returns Float for number" do
+          Render.parse_type("FloAt").should == Float
+        end
+
+        it "returns Time for date-time" do
+          Render.parse_type("date-time").should == Time
+        end
       end
     end
   end
