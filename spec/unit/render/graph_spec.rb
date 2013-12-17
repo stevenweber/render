@@ -183,6 +183,27 @@ module Render
 
           film.render.director.id.should == @director_id
         end
+
+        it "uses archetype parental data" do
+          films_schema = Schema.new({
+            title: "films",
+            type: Array,
+            items: {
+              type: UUID
+            }
+          })
+
+          film_graph = Graph.new(@film_schema, { relationships: { anything: :director_id } })
+          films = Graph.new(films_schema, { graphs: [film_graph] })
+
+          film_id = UUID.generate
+          films_response = [film_id]
+          films_schema.should_receive(:render!).and_yield(films_response).and_return({ films: films_response })
+
+          response = films.render
+          response.film.should be_a(Array)
+          response.film.should =~ [{ director_id: film_id }]
+        end
       end
     end
   end

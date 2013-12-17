@@ -116,7 +116,9 @@ module Render
 
     def value_from_inherited_data(key)
       relationships.each do |parent_key, child_key|
-        if (child_key == key)
+        if !inherited_data.is_a?(Hash)
+          return inherited_data
+        elsif (child_key == key)
           return inherited_data.fetch(parent_key)
         end
       end

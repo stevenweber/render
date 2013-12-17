@@ -15,6 +15,8 @@ describe Render do
       @film_endpoint = "http://films.local/films/:id"
       @aquatic_id = UUID.generate
       @darjeeling_id = UUID.generate
+      @aquatic_name = "The Life Aquatic with Steve Zissou"
+      @darjeeling_name = "The Darjeeling Limited"
     end
 
     it "returns structured data for nested queries" do
@@ -47,13 +49,12 @@ describe Render do
     end
 
     it "makes subsequent calls from archetype array data" do
-      pending
       stub_request(:get, @films_endpoint).to_return({ body: [@aquatic_id, @darjeeling_id].to_json })
 
-      aquatic = @film_endpoint.gsub("id", @aquatic_id)
+      aquatic = @film_endpoint.gsub(":id", @aquatic_id)
       stub_request(:get, aquatic).to_return({ body: { name: @aquatic_name }.to_json })
 
-      darjeeling = @film_endpoint.gsub("id", @darjeeling_id)
+      darjeeling = @film_endpoint.gsub(":id", @darjeeling_id)
       stub_request(:get, darjeeling).to_return({ body: { name: @darjeeling_name }.to_json })
 
       films = Render::Schema.new({
@@ -74,7 +75,10 @@ describe Render do
 
       films = Render::Graph.new(films, { endpoint: @films_endpoint })
       films.graphs << Render::Graph.new(film, { endpoint: @film_endpoint, relationships: { id: :id } })
-      films.render.should == {}
+      films.render.film.should =~ [
+        { name: @aquatic_name },
+        { name: @darjeeling_name }
+      ]
     end
 
   end

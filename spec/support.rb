@@ -3,6 +3,7 @@ require "webmock/rspec"
 require "support/helpers"
 
 Render.logger = Logger.new("/dev/null")
+Render.threading = false
 
 RSpec.configure do |config|
   #
