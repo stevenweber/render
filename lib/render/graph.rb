@@ -51,10 +51,13 @@ module Render
 
     def render(inherited_properties = {})
       self.inherited_data = inherited_properties
+      options_and_explicit_data = inherited_data.is_a?(Hash) ? inherited_properties : {}
+      options_and_explicit_data.merge!(relationship_data_from_parent)
+      options_and_explicit_data.merge!({ endpoint: endpoint })
 
       graph_data = DottableHash.new
-      inherited_data = relationship_data_from_parent.merge({ endpoint: endpoint })
-      rendered_data = schema.render!(inherited_data) do |parent_data|
+
+      rendered_data = schema.render!(options_and_explicit_data) do |parent_data|
         loop_with_configured_threading(graphs) do |graph|
           if parent_data.is_a?(Array)
             graph_data[graph.title] = parent_data.inject([]) do |nested_data, element|
@@ -119,7 +122,7 @@ module Render
         if !inherited_data.is_a?(Hash)
           return inherited_data
         elsif (child_key == key)
-          return inherited_data.fetch(parent_key)
+          return inherited_data.fetch(parent_key, nil)
         end
       end
       nil

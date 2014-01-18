@@ -24,12 +24,17 @@ module Render
       self.schema = Schema.new(schema_options.merge(options))
     end
 
-    def serialize(explicit_value)
+    def serialize(explicit_value, maintain_nil = false)
       if !!schema
         value = schema.serialize!(explicit_value)
         { name.to_sym => value }
       else
-        value = (explicit_value || default_value)
+        if (maintain_nil && !explicit_value)
+          value = nil
+        else
+          value = (explicit_value || default_value)
+        end
+
         { name.to_sym => value }
       end
     end

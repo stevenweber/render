@@ -49,7 +49,9 @@ module Render
         self.serialized_data = hash_attributes.inject({}) do |processed_explicit_data, attribute|
           explicit_data ||= {}
           value = explicit_data.fetch(attribute.name, nil)
-          serialized_attribute = attribute.serialize(value)
+          maintain_nil = explicit_data.has_key?(attribute.name)
+
+          serialized_attribute = attribute.serialize(value, maintain_nil)
           processed_explicit_data.merge!(serialized_attribute)
         end
       end

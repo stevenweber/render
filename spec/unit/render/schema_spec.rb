@@ -90,7 +90,7 @@ module Render
           }
         }
         schema = Schema.new(definition)
-        schema.hash_attributes.first.should_receive(:serialize).with(nil).and_return({ title: "foo" })
+        schema.hash_attributes.first.should_receive(:serialize).with(nil, anything).and_return({ title: "foo" })
         schema.serialize!.should == { title: "foo" }
       end
     end
@@ -171,7 +171,7 @@ module Render
           stub_request(:get, endpoint).to_return(response)
 
           schema = Schema.new(:film)
-          schema.hash_attributes.first.should_receive(:serialize).with(genre).and_return({ genre: genre })
+          schema.hash_attributes.first.should_receive(:serialize).with(genre, anything).and_return({ genre: genre })
 
           schema.render!({ endpoint: endpoint }).should == { film: data }
         end
