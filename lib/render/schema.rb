@@ -57,9 +57,8 @@ module Render
       end
     end
 
-    def render!(options_and_explicit_data = nil)
-      endpoint = options_and_explicit_data.delete(:endpoint) if options_and_explicit_data.is_a?(Hash)
-      self.raw_data = Render.live ? request(endpoint) : options_and_explicit_data
+    def render!(explicit_data = nil, endpoint = nil)
+      self.raw_data = Render.live ? request(endpoint) : explicit_data
       serialize!(raw_data)
       yield serialized_data if block_given?
       self.rendered_data = DottableHash.new(hash_with_title_prefixes(serialized_data))

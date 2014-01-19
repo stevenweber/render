@@ -7,7 +7,7 @@ module Render
     before(:each) do
       Render.stub({ live: false })
       @definition = double(:definition)
-      @schema = double(:schema)
+      @schema = double(:schema, { type: Hash })
       Schema.stub(:new).with(@definition).and_return(@schema)
     end
 
@@ -108,7 +108,7 @@ module Render
         client_id = UUID.generate
         graph = Graph.new(@definition, { endpoint: endpoint, client_id: client_id })
 
-        @schema.should_receive(:render!).with({ endpoint: graph.endpoint }).and_return({})
+        @schema.should_receive(:render!).with(anything, graph.endpoint).and_return({})
         graph.render
       end
 
@@ -146,9 +146,8 @@ module Render
           film_data = { director_id: @director_id }
           @film_schema.should_receive(:render!).and_yield(film_data).and_return(film_data)
 
-          @director_schema.should_receive(:render!).with do |args|
-            args[:endpoint].should == "http://endpoint.local/directors/#{@director_id}"
-          end.and_return({})
+          endpoint = "http://endpoint.local/directors/#{@director_id}"
+          @director_schema.should_receive(:render!).with(anything, endpoint).and_return({})
           film.render
         end
 

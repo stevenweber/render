@@ -6,46 +6,63 @@ module Render
       #
     end
 
-    describe "#render" do
-      before(:each) do
-        Render.stub({ live: false })
-        @hash_definition = {
-          title: :book,
-          type: Object,
-          properties: {
-            title: { type: String }
+    context "not live" do
+      describe "#render" do
+        before(:each) do
+          Render.stub({ live: false })
+          @hash_definition = {
+            title: :book,
+            type: Object,
+            properties: {
+              title: { type: String }
+            }
           }
-        }
-        @array_definition = {
-          title: :books,
-          type: Array,
-          items: {
-            ids: { type: UUID }
+          @array_definition = {
+            title: :books,
+            type: Array,
+            items: {
+              type: UUID
+            }
           }
-        }
-      end
+        end
 
-      it "uses explicit data for hashes" do
-        graph = Render::Graph.new(@hash_definition)
-        green_eggs_and_ham = "Green Eggs and Ham"
-        data = graph.render({ title: green_eggs_and_ham })
-        data.book.title.should == green_eggs_and_ham
-      end
+        it "generates random number of array elements" do
+          graph = Graph.new(@array_definition)
+          data = graph.render
+          data.books.size.should > 0
+        end
 
-      it "uses explicit nil data for hashes" do
-        graph = Render::Graph.new(@hash_definition)
-        data = graph.render({ title: nil })
-        data.book.title.should == nil
-      end
+        context "explicit data" do
+          it "uses explicit data for hashes" do
+            graph = Render::Graph.new(@hash_definition)
+            green_eggs_and_ham = "Green Eggs and Ham"
+            data = graph.render({ title: green_eggs_and_ham })
+            data.book.title.should == green_eggs_and_ham
+          end
 
-      it "uses explicit data for arrays" do
-        pending "this passes for the wrong reason"
-        graph = Render::Graph.new(@array_definition)
-        data = graph.render([])
-        data.books.should == []
-      end
+          it "uses explicit nil data for hashes" do
+            graph = Render::Graph.new(@hash_definition)
+            data = graph.render({ title: nil })
+            data.book.title.should == nil
+          end
 
-      it "uses explicit data for nested data"
+          it "uses explicit data for arrays" do
+            graph = Render::Graph.new(@array_definition)
+            id = UUID.generate
+            graph.render([id]).books.should == [id]
+            graph.render([]).books.should == []
+          end
+
+          it "uses explicit data for nested data" do
+            @array_definition[:items] = @hash_definition
+            nested_graph = Graph.new(@array_definition)
+            tell_tale_heart = "The Tell-Tale Heart"
+            data = nested_graph.render([{ title: tell_tale_heart }])
+            data.books.size.should == 1
+            data.books.first.title.should == tell_tale_heart
+          end
+        end
+      end
     end
   end
 end

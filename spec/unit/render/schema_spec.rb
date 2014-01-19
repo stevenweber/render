@@ -146,7 +146,7 @@ module Render
 
           expect {
             schema = Schema.new(:film)
-            schema.render!({ endpoint: endpoint })
+            schema.render!(nil, endpoint)
           }.to raise_error(Errors::Schema::RequestError)
         end
 
@@ -155,7 +155,7 @@ module Render
           stub_request(:get, endpoint).to_return({ body: "Server Error: 500" })
 
           expect {
-            Schema.new(:film).render!({ endpoint: endpoint })
+            Schema.new(:film).render!(nil, endpoint)
           }.to raise_error(Errors::Schema::InvalidResponse)
         end
 
@@ -173,7 +173,7 @@ module Render
           schema = Schema.new(:film)
           schema.hash_attributes.first.should_receive(:serialize).with(genre, anything).and_return({ genre: genre })
 
-          schema.render!({ endpoint: endpoint }).should == { film: data }
+          schema.render!(nil, endpoint).should == { film: data }
         end
 
         it "is serialized value nested under #universal_title" do
