@@ -87,12 +87,21 @@ module Render
       end
 
       context "offline" do
+        before(:each) do
+          Render.stub({ live: false })
+        end
+
         it "uses faux data when offline" do
           type = [String, Integer].sample
-          Render.stub({ live: false })
-
           data = HashAttribute.new({ title: { type: type } }).serialize(nil)
           data[:title].should be_a(type)
+        end
+
+        it "maintains falsy-ie values when instructed" do
+          data = HashAttribute.new({ title: { type: Integer } }).serialize(nil, true)
+          data[:title].should == nil
+          data = HashAttribute.new({ title: { type: Integer } }).serialize(false, true)
+          data[:title].should == false
         end
       end
     end

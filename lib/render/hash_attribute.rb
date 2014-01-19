@@ -30,7 +30,7 @@ module Render
         { name.to_sym => value }
       else
         if (maintain_nil && !explicit_value)
-          value = nil
+          value = explicit_value
         else
           value = (explicit_value || default_value)
         end
