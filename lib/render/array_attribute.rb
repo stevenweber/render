@@ -10,7 +10,7 @@ module Render
       super
 
       self.name = options.fetch(:title, :render_array_attribute_untitled).to_sym
-      options = options[:items]
+      options = options.fetch(:items)
       self.type = Render.parse_type(options[:type])
       self.format = Render.parse_type(options[:format]) rescue nil
       self.enums = options[:enum]
@@ -44,8 +44,7 @@ module Render
     end
 
     def lower_limit
-      # lower_limit = (required ? 1 : 0)
-      1
+      required ? 1 : 0
     end
 
   end

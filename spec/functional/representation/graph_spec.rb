@@ -28,8 +28,8 @@ module Render
 
         it "generates random number of array elements" do
           graph = Graph.new(@array_definition)
-          data = graph.render
-          data.books.size.should > 0
+          generated_book_sizes = 5.times.collect { graph.render.books.size }
+          generated_book_sizes.compact.size.should > 1
         end
 
         context "explicit data" do
@@ -61,6 +61,7 @@ module Render
             data.books.size.should == 1
             data.books.first.title.should == tell_tale_heart
           end
+
         end
       end
     end

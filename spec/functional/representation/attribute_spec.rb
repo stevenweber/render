@@ -2,14 +2,12 @@ module Render
   describe Attribute do
     context "generators" do
       before(:each) do
-        @original_generators = Render.generators
-        @original_live = Render.live
-        Render.live = false
+        @original_generators = Render.generators.dup
+        Render.stub({ live: false })
       end
 
       after(:each) do
         Render.generators = @original_generators
-        Render.live = @original_live
       end
 
       it "uses matching generator for #faux_value" do
@@ -20,9 +18,9 @@ module Render
         HashAttribute.new({ name: { type: String } }).default_value.should == name
       end
 
-      it "uses really bare-boned type if no generator is found" do
-        bare_boned_string = "A String"
-        HashAttribute.new({ foo: { type: String } }).default_value.should == bare_boned_string
+      it "uses bare-boned type if no generator is found" do
+        bare_boned_string = "the_attribute_name (generated)"
+        HashAttribute.new({ the_attribute_name: { type: String } }).default_value.should == bare_boned_string
       end
     end
   end

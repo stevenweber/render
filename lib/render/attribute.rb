@@ -19,6 +19,12 @@ module Render
       self.required = false
     end
 
+    def generator
+      @generator ||= Render.generators.detect do |generator|
+        generator.type == type && name.match(generator.matcher)
+      end
+    end
+
     def bias_type
       format || type
     end
@@ -33,29 +39,21 @@ module Render
 
     private
 
-    # TODO implement better #faux_value
     def faux_value
       return enums.sample if enums
-      return generator_value if generator_value # todo optimize generator_value call
+      return generator.algorithm.call if generator
 
       case(bias_type.name)
-      when("String") then "A String"
+      when("String") then "#{name} (generated)"
       when("Integer") then rand(1000)
       when("UUID") then UUID.generate
       when("Boolean") then [true, false].sample
-      when("Float") then rand(0.1..99)
+      when("Float") then rand(0.1..99).round(2)
       when("Time")
         time = Time.now
         (type == String) ? time.to_s : time
       end
     end
 
-    def generator_value
-      generator = Render.generators.detect do |generator|
-        generator.type == type && name.match(generator.matcher)
-      end
-      generator.algorithm.call if generator
-    end
   end
-
 end

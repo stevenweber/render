@@ -38,8 +38,14 @@ module Render
       end
 
       it "generates fake number of elements" do
+        lower_limit = 6
+        upper_limit = 9
+        @attribute.stub({ lower_limit: lower_limit })
+        stub_const("Render::ArrayAttribute::FAUX_DATA_UPPER_LIMIT", upper_limit)
+
         faux_data = @attribute.serialize
-        faux_data.size.should be_between(0, ArrayAttribute::FAUX_DATA_UPPER_LIMIT)
+        faux_data.size.should >= lower_limit
+        faux_data.size.should <= upper_limit
         faux_data.sample.class.should == Float
       end
     end
