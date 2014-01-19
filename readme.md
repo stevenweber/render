@@ -3,27 +3,28 @@
 Create and test API requests simply with schemas.
 
 ```ruby
-Render.load_schemas!("spec/schemas") # JSON schema directory
-Render::Graph.new(:film, { endpoint: "http://films.local/films" }).render
+irb -r ./initialize
+Render.load_definitions!("spec/schemas") # JSON schema directory
+Render::Graph.new(:films_index, { endpoint: "http://films.local/films" }).render
 # or stub out schema-specific data
 Render.live = false
-Render::Graph.new(:film).render
+Render::Graph.new(:films_show).render
 ```
 
-*Use with caution* (Render is under initial development) by updating your Gemfile:
+Use by updating your Gemfile:
 
     gem "render"
 
 ## Caveats
 
-- Render will modify ::Hash and ::Enumerable to provide symbolize/stringify keys methods.
+- Render is under initial development and may include bugs
 
 ## Usage
 
-*Autoload schemas*
+*Autoload schema definitions*
 
 ```ruby
-Render.load_schemas!("path/to/json/schemas")
+Render.load_definitions!("path/to/json/schemas")
 Render::Graph.new(:schema_title, { endpoint: "http://films.local/films" }).render
 ```
 
@@ -43,8 +44,7 @@ Check out the examples in [integration tests](spec/integration/).
 
 1. Custom HTTP headers (e.g. { pragma: "no-cache", host: "dont_redirect_to_www.site.com" })
 2. Enhanced Attribute metadata (e.g. minlength)
-3. Parental params from root-level array
-4. Deep merge in #render for faux values
+3. Enhanced Graph to Graph relationships
 
 ## Contributing
 

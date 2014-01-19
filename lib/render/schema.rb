@@ -89,7 +89,12 @@ module Render
     def default_request(endpoint)
       response = Net::HTTP.get_response(URI(endpoint))
       if response.kind_of?(Net::HTTPSuccess)
-        JSON.parse(response.body).recursive_symbolize_keys!
+        response = JSON.parse(response.body)
+        if response.is_a?(Array)
+          SymbolizableArray.new(response).recursively_symbolize_keys!
+        else
+          DottableHash.new(response).recursively_symbolize_keys!
+        end
       else
         raise Errors::Schema::RequestError.new(endpoint, response)
       end

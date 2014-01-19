@@ -3,9 +3,7 @@
 #  - Query its endpoint to construct a hash for its Schema
 #  - Add nested Graphs by interpreting/sending data they need
 
-require "extensions/enumerable"
 require "extensions/boolean"
-require "extensions/hash"
 
 require "render/version"
 require "render/graph"
@@ -35,7 +33,8 @@ module Render
       Dir.glob("#{directory}/**/*.json").each do |definition_file|
         logger.info("Reading #{definition_file} definition")
         definition_string = File.read(definition_file)
-        parsed_definition = JSON.parse(definition_string).recursive_symbolize_keys!
+        json_definition = JSON.parse(definition_string)
+        parsed_definition = DottableHash.new(json_definition).recursively_symbolize_keys!
         load_definition!(parsed_definition)
       end
     end
