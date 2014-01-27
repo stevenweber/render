@@ -12,8 +12,7 @@ module Render
 
       it "uses matching generator for #faux_value" do
         name = "Canada Dry"
-        generator = Generator.new({ type: String, matcher: %r{.*name.*}, algorithm: proc { name } })
-        Render.generators << generator
+        Generator.new(String, %r{.*name.*}, proc { name })
 
         HashAttribute.new({ name: { type: String } }).default_value.should == name
       end

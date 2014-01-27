@@ -1,4 +1,4 @@
 source "http://rubygems.org"
 
-# Specify your gem's dependencies in representation.gemspec
+# Specify your gem's dependencies in render.gemspec
 gemspec

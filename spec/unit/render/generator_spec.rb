@@ -2,38 +2,40 @@ require "render/generator"
 
 module Render
   describe Generator do
-    it "exists" do
-      expect { Generator }.to_not raise_error
+    before(:each) do
+      @original_generators = Render.generators.dup
     end
 
-    describe "properties" do
-      before(:each) do
-        @mandatory_options = { algorithm: proc {} }
-      end
-
-      it "is a type-specific generator for flexibility" do
-        Generator.new(@mandatory_options.merge({ type: String })).type.should == String
-      end
-
-      it "has a matcher to only be used on specific properties" do
-        matcher = %r{.*name.*}
-        Generator.new(@mandatory_options.merge({ matcher: matcher })).matcher.should == matcher
-      end
-
-      describe "#algorith" do
-        it "has an algorithm that generates a value to be used" do
-          algorithm = lambda { "The Darjeeling limited" }
-          Generator.new({ algorithm: algorithm }).algorithm.should == algorithm
-        end
-
-        it "raises an error if algorithm does not respond to call" do
-          expect {
-            Generator.new({ algorithm: "want this to be the fake value" })
-          }.to raise_error(Errors::Generator::MalformedAlgorithm)
-        end
-      end
+    after(:each) do
+      Render.generators = @original_generators
     end
 
+    it "sets the type of data it can be used to generate data for" do
+      type = [UUID, Float].sample
+      Generator.new(type, nil, proc {}).type.should == type
+    end
+
+    it "sets a matcher to classify what attribute-name(s) it should be used for" do
+      matcher = %r{film_title.*}i
+      Generator.new(String, matcher, proc {}).matcher.should == matcher
+    end
+
+    it "sets an algorithm to be used to generate values" do
+      algorithm = lambda { UUID.generate }
+      Generator.new(UUID, //, algorithm).algorithm.should == algorithm
+    end
+
+    it "guarantees algorithm responds to #call for real-time value generation" do
+      algorithm = UUID.generate
+      expect {
+        Generator.new(UUID, //, algorithm)
+      }.to raise_error(Errors::Generator::MalformedAlgorithm)
+    end
+
+    it "adds generator to Render" do
+      expect {
+        Generator.new(UUID, /id/i, lambda { UUID.generate })
+      }.to change { Render.generators.size }.by(1)
+    end
   end
-
 end

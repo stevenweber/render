@@ -50,14 +50,13 @@ module Render
       raise Errors::DefinitionNotFound.new(title)
     end
 
-    # TODO better type parsing
     def parse_type(type)
       return type unless type.is_a?(String)
 
       return UUID if type.match(/uuid/i)
       return Boolean if type.match(/boolean/i)
       return Float if type.match(/number/i)
-      return Time if type.match(/date.*time/i)
+      return Time if type.match(/time/i)
       Object.const_get(type.capitalize)
     rescue NameError => error
       raise Errors::InvalidType.new(type)

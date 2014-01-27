@@ -36,6 +36,7 @@ GEM
     webmock (1.13.0)
       addressable (>= 2.2.7)
       crack (>= 0.3.2)
+    yard (0.8.7.3)
 
 PLATFORMS
   ruby
@@ -47,3 +48,4 @@ DEPENDENCIES
   render!
   rspec
   webmock
+  yard
