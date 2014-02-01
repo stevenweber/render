@@ -33,7 +33,7 @@ GEM
     systemu (2.5.2)
     uuid (2.3.7)
       macaddr (~> 1.0)
-    webmock (1.13.0)
+    webmock (1.17.1)
       addressable (>= 2.2.7)
       crack (>= 0.3.2)
     yard (0.8.7.3)
@@ -43,9 +43,9 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 1.3)
-  debugger
-  rake
+  debugger (~> 1.6)
+  rake (~> 10.1)
   render!
-  rspec
-  webmock
-  yard
+  rspec (~> 2.14)
+  webmock (~> 1.17)
+  yard (~> 0.8)
