@@ -100,7 +100,7 @@ module Render
         @schema.stub({ render!: pull })
 
         graph = Graph.new(@definition)
-        graph.render.should be_a(DottableHash)
+        graph.render.should be_a(Extensions::DottableHash)
       end
 
       it "sends interpolated endpoint to its schema" do

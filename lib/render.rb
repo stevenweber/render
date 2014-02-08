@@ -3,13 +3,14 @@
 #  - Query its endpoint to construct a hash for its Schema
 #  - Add nested Graphs by interpreting/sending data they need
 
-require "extensions/boolean"
+require "uuid"
+require "date"
+require "logger"
 
 require "render/version"
+require "render/types"
 require "render/graph"
 require "render/generator"
-require "logger"
-require "date"
 
 module Render
   @live = true
@@ -34,7 +35,7 @@ module Render
         logger.info("Reading #{definition_file} definition")
         definition_string = File.read(definition_file)
         json_definition = JSON.parse(definition_string)
-        parsed_definition = DottableHash.new(json_definition).recursively_symbolize_keys!
+        parsed_definition = Extensions::DottableHash.new(json_definition).recursively_symbolize_keys!
         load_definition!(parsed_definition)
       end
     end
@@ -53,11 +54,13 @@ module Render
     def parse_type(type)
       return type unless type.is_a?(String)
 
-      return UUID if type.match(/uuid/i)
-      return Boolean if type.match(/boolean/i)
-      return Float if type.match(/number/i)
-      return Time if type.match(/time/i)
-      Object.const_get(type.capitalize)
+      case type
+        when /uuid/i then UUID
+        when /number/i then Float
+        when /time/i then Time
+      else
+        Render::Types.find(type) || Object.const_get(type.capitalize)
+      end
     rescue NameError => error
       raise Errors::InvalidType.new(type)
     end

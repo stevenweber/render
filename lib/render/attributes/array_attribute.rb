@@ -1,4 +1,4 @@
-require "render/attribute"
+require "render/attributes/attribute"
 
 module Render
   class ArrayAttribute < Attribute

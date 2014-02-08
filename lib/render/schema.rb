@@ -4,10 +4,9 @@
 require "net/http"
 require "json"
 require "render"
-require "render/attribute"
-require "render/array_attribute"
-require "render/hash_attribute"
-require "render/dottable_hash"
+require "render/attributes/array_attribute"
+require "render/attributes/hash_attribute"
+require "render/extensions/dottable_hash"
 
 module Render
   class Schema
@@ -61,7 +60,7 @@ module Render
       self.raw_data = Render.live ? request(endpoint) : explicit_data
       serialize!(raw_data)
       yield serialized_data if block_given?
-      self.rendered_data = DottableHash.new(hash_with_title_prefixes(serialized_data))
+      self.rendered_data = Extensions::DottableHash.new(hash_with_title_prefixes(serialized_data))
     end
 
     private
@@ -91,9 +90,9 @@ module Render
       if response.kind_of?(Net::HTTPSuccess)
         response = JSON.parse(response.body)
         if response.is_a?(Array)
-          SymbolizableArray.new(response).recursively_symbolize_keys!
+          Extensions::SymbolizableArray.new(response).recursively_symbolize_keys!
         else
-          DottableHash.new(response).recursively_symbolize_keys!
+          Extensions::DottableHash.new(response).recursively_symbolize_keys!
         end
       else
         raise Errors::Schema::RequestError.new(endpoint, response)

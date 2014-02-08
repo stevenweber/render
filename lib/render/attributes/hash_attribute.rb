@@ -1,5 +1,5 @@
 require "render"
-require "render/attribute"
+require "render/attributes/attribute"
 
 module Render
   class HashAttribute < Attribute

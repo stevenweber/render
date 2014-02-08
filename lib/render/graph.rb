@@ -6,7 +6,7 @@
 
 require "render/schema"
 require "render/errors"
-require "render/dottable_hash"
+require "render/extensions/dottable_hash"
 
 module Render
   class Graph
@@ -58,7 +58,7 @@ module Render
         explicit_data = explicit_data.merge!(relationship_data_from_parent)
       end
 
-      graph_data = DottableHash.new
+      graph_data = Extensions::DottableHash.new
 
       rendered_data = schema.render!(explicit_data, endpoint) do |parent_data|
         loop_with_configured_threading(graphs) do |graph|

@@ -1,4 +1,4 @@
-require "render/array_attribute"
+require "render/attributes/array_attribute"
 
 module Render
   describe ArrayAttribute do
