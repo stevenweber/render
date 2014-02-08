@@ -4,11 +4,11 @@ Create and test API requests simply with schemas.
 
 ```ruby
 irb -r ./initialize
-Render.load_definitions!("spec/schemas") # JSON schema directory
-Render::Graph.new(:films_index, { endpoint: "http://films.local/films" }).render
+Render.load_definitions!("spec/support/schemas") # JSON schema directory
+Render::Graph.new(:films_index, { endpoint: "http://films.local/films" }).render!
 # or stub out schema-specific data
 Render.live = false
-Render::Graph.new(:films_show).render
+Render::Graph.new(:films_show).render!
 ```
 
 Use by updating your Gemfile:
@@ -25,7 +25,7 @@ Use by updating your Gemfile:
 
 ```ruby
 Render.load_definitions!("path/to/json/schemas")
-Render::Graph.new(:schema_title, { endpoint: "http://films.local/films" }).render
+Render::Graph.new(:schema_title, { endpoint: "http://films.local/films" }).render!
 ```
 
 *Variable interpolation*
@@ -35,7 +35,7 @@ api_endpoint = "http://films.local/films/:id?:client_token"
 env_specific_client_token = "token"
 
 graph = Render::Graph.new(:schema_title, { endpoint: api_endpoint, client_token: env_specific_client_token })
-graph.render({ id: "an-id" }) # makes request to "http://films.local/films/an-id?client_token=token"
+graph.render!({ id: "an-id" }) # makes request to "http://films.local/films/an-id?client_token=token"
 ```
 
 Check out the examples in [integration tests](spec/integration/).

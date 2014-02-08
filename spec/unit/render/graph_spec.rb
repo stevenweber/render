@@ -92,7 +92,7 @@ module Render
         @schema.stub({ render!: pull, serialized_data: serialized_data })
 
         graph = Graph.new(@definition)
-        graph.render.should == pull
+        graph.render!.should == pull
       end
 
       it "returns a dottable hash" do
@@ -100,7 +100,7 @@ module Render
         @schema.stub({ render!: pull })
 
         graph = Graph.new(@definition)
-        graph.render.should be_a(Extensions::DottableHash)
+        graph.render!.should be_a(Extensions::DottableHash)
       end
 
       it "sends interpolated endpoint to its schema" do
@@ -109,7 +109,7 @@ module Render
         graph = Graph.new(@definition, { endpoint: endpoint, client_id: client_id })
 
         @schema.should_receive(:render!).with(anything, graph.endpoint).and_return({})
-        graph.render
+        graph.render!
       end
 
       context "with nested graphs" do
@@ -133,7 +133,7 @@ module Render
 
         it "includes nested graphs" do
           film = Graph.new(@film_schema, { graphs: [Graph.new(@director_schema)] })
-          film = film.render
+          film = film.render!
           film.keys.should =~ [:film, :director]
         end
 
@@ -148,7 +148,7 @@ module Render
 
           endpoint = "http://endpoint.local/directors/#{@director_id}"
           @director_schema.should_receive(:render!).with(anything, endpoint).and_return({})
-          film.render
+          film.render!
         end
 
         it "uses parent data to make multiple queries" do
@@ -170,7 +170,7 @@ module Render
           films_response = [{ id: first_film_id }, { id: second_film_id }]
           films_schema.should_receive(:render!).and_yield(films_response).and_return({ films: films_response })
 
-          response = films.render
+          response = films.render!
           response.film.should be_a(Array)
           response.film.should =~ [{ director_id: first_film_id }, { director_id: second_film_id }]
         end
@@ -180,7 +180,7 @@ module Render
           film = Graph.new(@film_schema, { graphs: [director] })
           @film_schema.should_receive(:render!).and_yield({ director_id: @director_id }).and_return({})
 
-          film.render.director.id.should == @director_id
+          film.render!.director.id.should == @director_id
         end
 
         it "uses archetype parental data" do
@@ -199,7 +199,7 @@ module Render
           films_response = [film_id]
           films_schema.should_receive(:render!).and_yield(films_response).and_return({ films: films_response })
 
-          response = films.render
+          response = films.render!
           response.film.should be_a(Array)
           response.film.should =~ [{ director_id: film_id }]
         end

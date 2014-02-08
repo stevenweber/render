@@ -25,7 +25,7 @@ describe Render do
       stub_request(:get, aquatic_uri).to_return({ body: [{ id: @film_id }].to_json })
 
       graph = Render::Graph.new(:films_index, { endpoint: @films_endpoint, secret_code: @secret_code })
-      graph.render.should == { films_index: { films: [{ id: @film_id }] } }
+      graph.render!.should == { films_index: { films: [{ id: @film_id }] } }
     end
 
     it "returns structured data for specific resources" do
@@ -34,7 +34,7 @@ describe Render do
       stub_request(:get, aquatic_uri).to_return({ body: { name: @film_name }.to_json })
 
       graph = Render::Graph.new(:films_show, { id: id, endpoint: @film_endpoint, secret_code: @secret_code })
-      graph.render.should == { films_show: { film: { name: @film_name, year: nil } } }
+      graph.render!.should == { films_show: { film: { name: @film_name, year: nil } } }
     end
   end
 
@@ -44,7 +44,7 @@ describe Render do
     end
 
     it "use meaningful values" do
-      response = Render::Graph.new(:films_show).render({ name: @film_name })
+      response = Render::Graph.new(:films_show).render!({ name: @film_name })
 
       stub_request(:post, "http://films.local/create").to_return({ body: response.to_json })
       response = post_film(:anything)["films_show"]["film"]

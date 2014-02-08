@@ -49,7 +49,7 @@ module Render
       uri.to_s
     end
 
-    def render(inherited_properties = nil)
+    def render!(inherited_properties = nil)
       self.inherited_data = inherited_properties
       if (schema.type == Array)
         explicit_data = inherited_data
@@ -64,10 +64,10 @@ module Render
         loop_with_configured_threading(graphs) do |graph|
           if parent_data.is_a?(Array)
             graph_data[graph.title] = parent_data.inject([]) do |nested_data, element|
-              nested_data << graph.render(element)[graph.title]
+              nested_data << graph.render!(element)[graph.title]
             end
           else
-            nested_data = graph.render(parent_data)
+            nested_data = graph.render!(parent_data)
             graph_data.merge!(nested_data)
           end
         end
@@ -75,6 +75,12 @@ module Render
 
       self.rendered_data = graph_data.merge!(rendered_data)
     end
+
+    def title
+      schema.universal_title || schema.title
+    end
+
+    private
 
     def loop_with_configured_threading(elements)
       if Render.threading?
@@ -91,12 +97,6 @@ module Render
         end
       end
     end
-
-    def title
-      schema.universal_title || schema.title
-    end
-
-    private
 
     def determine_schema(schema_or_definition)
       if schema_or_definition.is_a?(Schema)

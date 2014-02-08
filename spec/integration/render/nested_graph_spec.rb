@@ -36,7 +36,7 @@ describe Render do
         endpoint: @films_endpoint
       }
       graph = Render::Graph.new(:films_index, options)
-      graph.render.should == {
+      graph.render!.should == {
         films_index: {
           films: films_index_response
         },
@@ -75,7 +75,7 @@ describe Render do
 
       films = Render::Graph.new(films, { endpoint: @films_endpoint })
       films.graphs << Render::Graph.new(film, { endpoint: @film_endpoint, relationships: { id: :id } })
-      films.render.film.should =~ [
+      films.render!.film.should =~ [
         { name: @aquatic_name },
         { name: @darjeeling_name }
       ]
