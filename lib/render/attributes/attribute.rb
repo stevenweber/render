@@ -19,12 +19,6 @@ module Render
       self.required = false
     end
 
-    def generator
-      @generator ||= Render.generators.detect do |generator|
-        generator.type == type && name.match(generator.matcher)
-      end
-    end
-
     def bias_type
       format || type
     end
@@ -39,20 +33,18 @@ module Render
 
     private
 
-    def faux_value
-      return enums.sample if enums
-      return generator.algorithm.call if generator
+    def process_type!(options)
+      self.type = Render.parse_type(options[:type])
+      self.format = Render.parse_type(options[:format]) rescue nil
 
-      case(bias_type.name)
-      when("String") then "#{name} (generated)"
-      when("Integer") then rand(1000)
-      when("UUID") then UUID.generate
-      when("Boolean") then [true, false].sample
-      when("Float") then rand(0.1..99).round(2)
-      when("Time")
-        time = Time.now
-        (type == String) ? time.to_s : time
+      if (options[:enum])
+        self.enums = options[:enum]
+        self.format = Types::Enum
       end
+    end
+
+    def faux_value
+      Generator.trigger(bias_type, name, self)
     end
 
   end

@@ -8,9 +8,7 @@ module Render
 
       self.name = options.keys.first
       options = options[name]
-      self.type = Render.parse_type(options[:type])
-      self.format = Render.parse_type(options[:format]) rescue nil
-      self.enums = options[:enum]
+      process_type!(options)
 
       initialize_schema!(options) if nested_schema?(options)
     end

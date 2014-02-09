@@ -8,6 +8,8 @@ require "date"
 require "logger"
 
 require "render/version"
+require "render/extensions/dottable_hash"
+require "render/errors"
 require "render/types"
 require "render/graph"
 require "render/generator"
@@ -15,14 +17,12 @@ require "render/generator"
 module Render
   @live = true
   @definitions = {}
-  @generators = []
-  @logger = ::Logger.new($stdout)
+  @logger = ::Logger.new("/dev/null")
   @threading = true
 
   class << self
     attr_accessor :live,
       :definitions,
-      :generators,
       :logger,
       :threading
 
@@ -52,18 +52,7 @@ module Render
     end
 
     def parse_type(type)
-      return type unless type.is_a?(String)
-
-      case type
-        when /uuid/i then UUID
-        when /number/i then Float
-        when /time/i then Time
-      else
-        Render::Types.find(type) || Object.const_get(type.capitalize)
-      end
-    rescue NameError => error
-      raise Errors::InvalidType.new(type)
+      Render::Types.parse(type)
     end
   end
-
 end

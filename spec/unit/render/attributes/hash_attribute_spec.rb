@@ -126,7 +126,9 @@ module Render
           supported_classes.each do |klass|
             HashAttribute.new({ key: { type: klass } }).default_value.should be_a(klass)
           end
-          UUID.validate(HashAttribute.new({ key: { type: UUID } }).default_value).should be_true
+
+          value = HashAttribute.new({ key: { type: UUID } }).default_value
+          UUID.validate(value).should be_true
         end
 
         it "generates value from enum" do

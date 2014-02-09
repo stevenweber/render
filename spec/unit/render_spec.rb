@@ -32,21 +32,6 @@ describe Render do
       end
     end
 
-    describe ".generators" do
-      before(:each) do
-        @original_value = Render.generators
-        Render.generators.clear
-      end
-
-      after(:each) do
-        Render.generators = @original_value
-      end
-
-      it "defaults to an empty array" do
-        Render.generators.should == []
-      end
-    end
-
     context "schema definitions" do
       before(:each) do
         @original_defs = Render.definitions

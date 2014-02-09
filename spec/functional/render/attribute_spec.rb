@@ -2,17 +2,17 @@ module Render
   describe Attribute do
     context "generators" do
       before(:each) do
-        @original_generators = Render.generators.dup
+        @original_generators = Generator.instances.dup
         Render.stub({ live: false })
       end
 
       after(:each) do
-        Render.generators = @original_generators
+        Generator.instances = @original_generators
       end
 
       it "uses matching generator for #faux_value" do
         name = "Canada Dry"
-        Generator.new(String, %r{.*name.*}, proc { name })
+        Generator.create!(String, %r{.*name.*}, proc { name })
 
         HashAttribute.new({ name: { type: String } }).default_value.should == name
       end

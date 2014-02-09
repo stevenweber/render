@@ -11,9 +11,7 @@ module Render
 
       self.name = options.fetch(:title, :render_array_attribute_untitled).to_sym
       options = options.fetch(:items)
-      self.type = Render.parse_type(options[:type])
-      self.format = Render.parse_type(options[:format]) rescue nil
-      self.enums = options[:enum]
+      process_type!(options)
 
       if options.keys.include?(:properties)
         self.schema = Schema.new(options)
