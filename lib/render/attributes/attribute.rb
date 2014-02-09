@@ -34,12 +34,12 @@ module Render
     private
 
     def process_type!(options)
-      self.type = Render.parse_type(options[:type])
-      self.format = Render.parse_type(options[:format]) rescue nil
+      self.type = Type.parse!(options[:type])
+      self.format = Type.parse(options[:format])
 
       if (options[:enum])
         self.enums = options[:enum]
-        self.format = Types::Enum
+        self.format = Type::Enum
       end
     end
 

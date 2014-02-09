@@ -62,7 +62,7 @@ module Render
     Generator.create!(Float, /.*/, proc { rand(0.1..99).round(2) })
     Generator.create!(UUID, /.*/, proc { UUID.generate })
     Generator.create!(Time, /.*/, proc { |attribute| time = Time.now; (attribute.type == String) ? time.to_s : time })
-    Generator.create!(Types::Boolean, /.*/, proc { [true, false].sample })
-    Generator.create!(Types::Enum, /.*/, proc { |attribute| attribute.enums.sample })
+    Generator.create!(Type::Boolean, /.*/, proc { [true, false].sample })
+    Generator.create!(Type::Enum, /.*/, proc { |attribute| attribute.enums.sample })
   end
 end

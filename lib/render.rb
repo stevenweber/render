@@ -8,12 +8,12 @@ require "date"
 require "logger"
 
 require "render/version"
-require "render/extensions/dottable_hash"
 require "render/errors"
-require "render/types"
-require "render/graph"
+require "render/extensions/dottable_hash"
+require "render/type"
 require "render/generator"
 require "render/definition"
+require "render/graph"
 
 module Render
   @live = true
@@ -21,16 +21,15 @@ module Render
   @threading = true
 
   class << self
-    attr_accessor :live,
-      :logger,
-      :threading
+    attr_accessor :live, :logger, :threading
 
     def threading?
       threading == true
     end
 
-    def parse_type(type)
-      Render::Types.parse(type)
+    def live?
+      @live == true
     end
+
   end
 end
