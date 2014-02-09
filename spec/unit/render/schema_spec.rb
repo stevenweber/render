@@ -2,16 +2,16 @@ require "render"
 
 module Render
   describe Schema do
+    before(:each) do
+      @original_defs = Definition.instances.dup
+    end
+
+    after(:each) do
+      Definition.instances = @original_defs
+    end
+
     describe "#initialize" do
       describe "#definition" do
-        before(:all) do
-          @original_defs = Render.definitions
-        end
-
-        after(:all) do
-          Render.definitions = @original_defs
-        end
-
         it "is set from argument" do
           schema_definition = { properties: {} }
           Schema.new(schema_definition).definition.should == schema_definition
@@ -20,7 +20,7 @@ module Render
         it "is set to preloaded definition" do
           definition_title = :preloaded_schema
           definition = { title: definition_title, properties: { title: { type: String } } }
-          Render.load_definition!(definition)
+          Definition.load!(definition)
           Schema.new(definition_title).definition.should == definition
         end
 
@@ -96,18 +96,13 @@ module Render
     end
 
     describe "#render!" do
-      before(:all) do
-        @original_defs = Render.definitions
-        Render.load_definition!({
+      before(:each) do
+        Definition.load!({
           title: :film,
           properties: {
             genre: { type: String }
           }
         })
-      end
-
-      after(:all) do
-        Render.definitions = @original_defs
       end
 
       describe "#raw_data" do

@@ -69,7 +69,7 @@ module Render
       if (definition_or_title.is_a?(Hash) && !definition_or_title.empty?)
         definition_or_title
       else
-        Render.definition(definition_or_title)
+        Definition.find(definition_or_title)
       end
     end
 

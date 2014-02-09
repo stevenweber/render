@@ -4,7 +4,7 @@ Create and test API requests simply with schemas.
 
 ```ruby
 irb -r ./initialize
-Render.load_definitions!("spec/support/schemas") # JSON schema directory
+Render::Definition.load_from_directory!("spec/support/schemas") # JSON schema directory
 Render::Graph.new(:films_index, { endpoint: "http://films.local/films" }).render!
 # or stub out schema-specific data
 Render.live = false
@@ -24,7 +24,7 @@ Use by updating your Gemfile:
 *Autoload schema definitions*
 
 ```ruby
-Render.load_definitions!("path/to/json/schemas")
+Render::Definition.load_from_directory!("path/to/json/schemas")
 Render::Graph.new(:schema_title, { endpoint: "http://films.local/films" }).render!
 ```
 
