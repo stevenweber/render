@@ -3,8 +3,9 @@
 Create and test API requests simply with schemas.
 
 ```ruby
-irb -r ./initialize
-Render::Definition.load_from_directory!("spec/support/schemas") # JSON schema directory
+require "render"
+json_schema_directory = File.expand_path("gems/render-#{Render::VERSION}/spec/support/schemas", ENV["GEM_HOME"])
+Render::Definition.load_from_directory!(json_schema_directory)
 Render::Graph.new(:films_index, { endpoint: "http://films.local/films" }).render!
 # or stub out schema-specific data
 Render.live = false
