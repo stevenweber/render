@@ -1,56 +1,34 @@
 # Render
 
-Create and test API requests simply with schemas.
+Render improves the way you work with APIs.
 
-```ruby
-require "render"
-json_schema_directory = File.expand_path("gems/render-#{Render::VERSION}/spec/support/schemas", ENV["GEM_HOME"])
-Render::Definition.load_from_directory!(json_schema_directory)
-Render::Graph.new(:films_index, { endpoint: "http://films.local/films" }).render!
-# or stub out schema-specific data
-Render.live = false
-Render::Graph.new(:films_show).render!
-```
+* [Generate type-specific, dynamic API response data for testing](spec/integration/render/schema_spec.rb) with just a schema (JSON or Ruby)
+* [Make API requests](spec/integration/render/graph_spec.rb) with a URL and a schema
+* Build graphs that [interpret data from one endpoint to call others](spec/integration/render/nested_graph_spec.rb)
 
-Use by updating your Gemfile:
+## Setup
 
-    gem "render"
+Update your Gemfile:
 
-## Caveats
-
-- Render is under initial development and may include bugs
+      gem "render"
 
 ## Usage
 
-*Autoload schema definitions*
+Check out examples as part of the [integration tests](spec/integration/render).
 
-```ruby
-Render::Definition.load_from_directory!("path/to/json/schemas")
-Render::Graph.new(:schema_title, { endpoint: "http://films.local/films" }).render!
-```
+## Caveats
 
-*Variable interpolation*
-
-```ruby
-api_endpoint = "http://films.local/films/:id?:client_token"
-env_specific_client_token = "token"
-
-graph = Render::Graph.new(:schema_title, { endpoint: api_endpoint, client_token: env_specific_client_token })
-graph.render!({ id: "an-id" }) # makes request to "http://films.local/films/an-id?client_token=token"
-```
-
-Check out the examples in [integration tests](spec/integration/).
+- Render is under initial development
 
 ## Roadmap
 
-1. Custom HTTP headers (e.g. { pragma: "no-cache", host: "dont_redirect_to_www.site.com" })
-2. Enhanced Attribute metadata (e.g. minlength)
-3. Enhanced Graph to Graph relationships
+1. Custom headers (e.g. { pragma: "no-cache", host: "dont_redirect_to_www.site.com" })
+2. Enhance Attribute metadata (e.g. minlength)
+3. Enhance Graph to Graph relationships
+4. Custom request strategy
 
 ## Contributing
 
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+* Bugs and questions welcomed. If you know (or kind of know) what's going on:
+  * Write a failing test, kudos for solving it
+  * Put up a [pull request](https://help.github.com/articles/using-pull-requests)
