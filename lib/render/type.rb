@@ -1,3 +1,6 @@
+# Types define classes of data being interpreted. This is especially important in modeling fake data.
+# Add additional types for your specific needs, along with a generator to create fake data for it.
+
 require "uuid"
 
 module Render

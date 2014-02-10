@@ -1,6 +1,3 @@
-# An Attribute represents a specific key and value as part of a Schema.
-# It is responsible for casting its value and generating sample data.
-
 require "uuid"
 
 module Render

@@ -1,8 +1,3 @@
-# Render allows one to define object Graphs with Schema/endpoint information.
-# Once defined and constructed, a Graph can be built at once that will:
-#  - Query its endpoint to construct a hash for its Schema
-#  - Add nested Graphs by interpreting/sending data they need
-
 require "uuid"
 require "date"
 require "logger"

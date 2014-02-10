@@ -1,6 +1,3 @@
-# The Schema defines a collection of properties.
-# It is responsible for returning its properties' values back to its Graph.
-
 require "net/http"
 require "json"
 require "render"
@@ -22,7 +19,6 @@ module Render
       :serialized_data,
       :rendered_data
 
-    # TODO When given { ids: [1,2] }, parental_mapping { ids: id } means to make 2 calls
     def initialize(definition_or_title)
       Render.logger.debug("Loading #{definition_or_title}")
 
@@ -88,7 +84,7 @@ module Render
     def default_request(endpoint)
       response = Net::HTTP.get_response(URI(endpoint))
       if response.kind_of?(Net::HTTPSuccess)
-        response = JSON.parse(response.body)
+        response = JSON.parse(response.body.to_s)
         if response.is_a?(Array)
           Extensions::SymbolizableArray.new(response).recursively_symbolize_keys!
         else

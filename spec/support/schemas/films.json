@@ -2,6 +2,7 @@
   "universal_title": "films_index",
   "title": "films",
   "type": "array",
+  "endpoint": "http://:host",
   "items": {
     "title": "film",
     "type" : "object",

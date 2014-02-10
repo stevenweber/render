@@ -6,8 +6,8 @@ module Render
   describe Graph do
     before(:each) do
       Render.stub({ live: false })
-      @definition = double(:definition)
-      @schema = double(:schema, { type: Hash })
+      @definition = double(:definition, { :[] => nil })
+      @schema = double(:schema, { type: Hash, definition: @definition })
       Schema.stub(:new).with(@definition).and_return(@schema)
     end
 
@@ -20,8 +20,8 @@ module Render
         end
 
         it "is set to new Schema from definition" do
-          Schema.should_receive(:new).with(:title_or_definition).and_return(:schema)
-          Graph.new(:title_or_definition).schema.should == :schema
+          Schema.should_receive(:new).with(:title_or_definition).and_return(@schema)
+          Graph.new(:title_or_definition).schema.should == @schema
         end
       end
 
@@ -49,11 +49,11 @@ module Render
       end
     end
 
-    describe ".endpoint" do
+    describe ".send(:endpoint)" do
       it "returns #raw_endpoint" do
         simple_endpoint = "http://endpoint.local"
         graph = Graph.new(@definition, { endpoint: simple_endpoint })
-        graph.endpoint.should == simple_endpoint
+        graph.send(:endpoint).should == simple_endpoint
       end
 
       it "interpolates inherited parameters" do
@@ -64,7 +64,7 @@ module Render
         graph = Graph.new(@definition, { endpoint: endpoint, relationships: relationships })
         graph.inherited_data = { director_id: director_id }
 
-        graph.endpoint.should == "http://endpoint.local/directors/#{director_id}"
+        graph.send(:endpoint).should == "http://endpoint.local/directors/#{director_id}"
       end
 
       it "interpolates config options" do
@@ -72,7 +72,7 @@ module Render
         endpoint = "http://endpoint.local/?:client_id"
 
         graph = Graph.new(@definition, { endpoint: endpoint, client_id: client_id })
-        graph.endpoint.should == "http://endpoint.local/?client_id=#{client_id}"
+        graph.send(:endpoint).should == "http://endpoint.local/?client_id=#{client_id}"
       end
 
       it "raises an error if no value can be found" do
@@ -80,7 +80,7 @@ module Render
         graph = Graph.new(@definition, { endpoint: endpoint })
 
         expect {
-          graph.endpoint
+          graph.send(:endpoint)
         }.to raise_error(Errors::Graph::EndpointKeyNotFound)
       end
     end
@@ -108,7 +108,7 @@ module Render
         client_id = UUID.generate
         graph = Graph.new(@definition, { endpoint: endpoint, client_id: client_id })
 
-        @schema.should_receive(:render!).with(anything, graph.endpoint).and_return({})
+        @schema.should_receive(:render!).with(anything, graph.send(:endpoint)).and_return({})
         graph.render!
       end
 

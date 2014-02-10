@@ -1,9 +1,3 @@
-# The Graph is the top-level model that defines a Schema and correlating Graphs.
-# It also includes particular metadata:
-#  - Endpoint to query for its schema's data
-#  - Config for this endpoint, e.g. an access token
-#  - Relationships between it and a Graph that includes it
-
 require "render/schema"
 require "render/errors"
 require "render/extensions/dottable_hash"
@@ -25,28 +19,14 @@ module Render
       self.schema = determine_schema(schema_or_definition)
       self.relationships = (options.delete(:relationships) || {})
       self.graphs = (options.delete(:graphs) || [])
-      self.raw_endpoint = options.delete(:endpoint).to_s
+      self.raw_endpoint = (options.delete(:endpoint) || schema.definition[:endpoint]).to_s
       self.config = options
 
       self.inherited_data = {}
     end
 
-    def endpoint
-      uri = URI(raw_endpoint)
-
-      uri.path.gsub!(PARAMS) do |param|
-        key = param_key(param)
-        param.gsub(PARAM, param_value(key))
-      end
-
-      if uri.query
-        uri.query.gsub!(PARAMS) do |param|
-          key = param_key(param)
-          "#{key}=#{param_value(key)}&"
-        end.chop!
-      end
-
-      uri.to_s
+    def title
+      schema.universal_title || schema.title
     end
 
     def render!(inherited_properties = nil)
@@ -76,11 +56,26 @@ module Render
       self.rendered_data = graph_data.merge!(rendered_data)
     end
 
-    def title
-      schema.universal_title || schema.title
-    end
-
     private
+
+    def endpoint
+      raw_endpoint.gsub!(":host", config.fetch(:host)) if raw_endpoint.match(":host")
+      uri = URI(raw_endpoint)
+
+      uri.path.gsub!(PARAMS) do |param|
+        key = param_key(param)
+        param.gsub(PARAM, param_value(key).to_s)
+      end
+
+      if uri.query
+        uri.query.gsub!(PARAMS) do |param|
+          key = param_key(param)
+          "#{key}=#{param_value(key)}&"
+        end.chop!
+      end
+
+      uri.to_s
+    end
 
     def loop_with_configured_threading(elements)
       if Render.threading?

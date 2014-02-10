@@ -10,6 +10,7 @@ module Render
       super
 
       self.name = options.fetch(:title, :render_array_attribute_untitled).to_sym
+      self.required = options.fetch(:required, nil)
       options = options.fetch(:items)
       process_type!(options)
 
