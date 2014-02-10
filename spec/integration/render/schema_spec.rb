@@ -47,5 +47,44 @@ module Render
         response = TransformerExample.process_name
       }.not_to raise_error
     end
+
+    it "creates fake data for varying types" do
+      schema = {
+        title: :film,
+        type: Object,
+        properties: {
+          id: { type: UUID },
+          title: { type: String },
+          director: {
+            type: Object,
+            properties: {
+              rating: { type: Float }
+            }
+          },
+          genre: {
+            enum: ["horror", "action", "sci-fi"]
+          },
+          tags: {
+            type: Array,
+            required: true,
+            items: {
+              type: Object,
+              properties: {
+                name: { type: String },
+                id: { type: Integer }
+              }
+            }
+          }
+        }
+      }
+
+      response = Render::Schema.new(schema).serialize!
+      UUID.validate(response[:id]).should be_true
+      response[:title].should be_a(String)
+      response[:director][:rating].should be_a(Float)
+      %w(horror action sci-fi).should include(response[:genre])
+      response[:tags].first[:name].should be_a(String)
+      response[:tags].first[:id].should be_a(Integer)
+    end
   end
 end
