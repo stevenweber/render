@@ -3,6 +3,7 @@
 
 require "uuid"
 require "render/errors"
+require "date"
 
 module Render
   class Generator
@@ -64,5 +65,6 @@ module Render
     Generator.create!(Time, /.*/, proc { |attribute| time = Time.now; (attribute.type == String) ? time.to_s : time })
     Generator.create!(Type::Boolean, /.*/, proc { [true, false].sample })
     Generator.create!(Type::Enum, /.*/, proc { |attribute| attribute.enums.sample })
+    Generator.create!(Type::Date, /.*/, proc { Time.now.to_date })
   end
 end

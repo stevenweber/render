@@ -9,6 +9,7 @@ module Render
 
     class Enum; end
     class Boolean; end
+    class Date; end
 
     class << self
       attr_accessor :instances
@@ -24,8 +25,6 @@ module Render
       def parse(name, raise_error = false)
         return name unless name.is_a?(String)
         Render::Type.find(name) || Object.const_get(name.capitalize)
-      rescue NameError => error
-        raise Errors::InvalidType.new(name) if raise_error
       end
 
       def parse!(name)
@@ -59,5 +58,6 @@ module Render
     add!(:time, Time)
     add_render_specific_type!(:Boolean)
     add_render_specific_type!(:Enum)
+    add_render_specific_type!(:Date)
   end
 end
