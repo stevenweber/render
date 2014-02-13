@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    render (0.0.4)
+    render (0.0.5)
       uuid (= 2.3.7)
 
 GEM
