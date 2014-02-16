@@ -30,7 +30,7 @@ module Render
 
       def find(type, to_match)
         instances.detect do |generator|
-          (generator.type == type) && to_match.match(generator.matcher)
+          generator.type.to_s.match(/#{type}/i) && to_match.match(generator.matcher)
         end
       end
     end

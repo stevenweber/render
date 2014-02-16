@@ -3,6 +3,7 @@ require "render/generator"
 module Render
   describe Generator do
     before(:each) do
+      Render.stub({ live: false })
       @original_generators = Generator.instances.dup
     end
 
@@ -23,6 +24,13 @@ module Render
         first_generator = Generator.create!(String, /.*/, proc { "first" })
         second_generator = Generator.create!(String, /.*/, proc { "second" })
         Generator.find(String, :anything).trigger.should == second_generator.trigger
+      end
+    end
+
+    describe ".trigger" do
+      it "triggers matching generator for Render types" do
+        enum_attribute = HashAttribute.new({ attribute_name: { type: String, enum: ["foo"] } })
+        Generator.trigger(:enum, "anything", enum_attribute).should == "foo"
       end
     end
 

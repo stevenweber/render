@@ -15,6 +15,16 @@ module Render
         Type.parse("integer").should == Integer
       end
 
+      it "returns nil if no type is found" do
+        Type.parse("not-a-type").should == nil
+      end
+    end
+
+    describe ".parse!" do
+      it "returns constant for string" do
+        Type.parse("integer").should == Integer
+      end
+
       it "returns argument when not a string" do
         class ::Foo; end
         Type.parse(Foo).should == Foo

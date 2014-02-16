@@ -37,6 +37,11 @@ module Render
         Schema.new(definition).type.should == type
       end
 
+      it "defaults its type to Object" do
+        definition = { properties: {} }
+        Schema.new(definition).type.should == Object
+      end
+
       describe "#array_attribute" do
         it "is set for array schemas" do
           archetype_schema = {
@@ -55,6 +60,7 @@ module Render
       describe "#hash_attributes" do
         it "is set for object schemas" do
           simple_schema = {
+            type: Object,
             properties: {
               name: { type: String },
               genre: { type: String }
@@ -99,6 +105,7 @@ module Render
       before(:each) do
         Definition.load!({
           title: :film,
+          type: Object,
           properties: {
             genre: { type: String }
           }
@@ -176,6 +183,7 @@ module Render
           definition = {
             title: :film,
             universal_title: :imdb_films_show,
+            type: Object,
             properties: {
               genre: { type: String }
             }

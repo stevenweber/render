@@ -25,7 +25,7 @@ module Render
       self.definition = determine_definition(definition_or_title)
       title_or_default = definition.fetch(:title, DEFAULT_TITLE)
       self.title = title_or_default.to_sym
-      self.type = Type.parse!(definition[:type])
+      self.type = Type.parse(definition[:type]) || Object
       self.universal_title = definition.fetch(:universal_title, nil)
 
       if definition.keys.include?(:items)

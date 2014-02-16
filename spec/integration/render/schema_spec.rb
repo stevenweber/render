@@ -62,6 +62,7 @@ module Render
             }
           },
           genre: {
+            type: String,
             enum: ["horror", "action", "sci-fi"]
           },
           tags: {

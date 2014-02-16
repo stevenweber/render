@@ -7,7 +7,10 @@ module Render
         title: :films,
         type: Array,
         items: {
-          id: { type: "number" }
+          type: Object,
+          properties: {
+            id: { type: "number" }
+          }
         }
       }
     end
@@ -68,7 +71,8 @@ module Render
               }
             },
             genre: {
-              enum: ["horror", "action", "sci-fi"]
+              type: String,
+              enum: %w(horror action sci-fi)
             },
             tags: {
               type: Array,

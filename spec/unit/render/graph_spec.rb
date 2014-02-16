@@ -156,6 +156,7 @@ module Render
             title: "films",
             type: Array,
             items: {
+              type: Object,
               properties: {
                 id: { type: UUID }
               }

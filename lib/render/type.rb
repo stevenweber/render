@@ -25,6 +25,8 @@ module Render
       def parse(name, raise_error = false)
         return name unless name.is_a?(String)
         Render::Type.find(name) || Object.const_get(name.capitalize)
+      rescue NameError
+        raise Errors::InvalidType.new(name) if raise_error
       end
 
       def parse!(name)
