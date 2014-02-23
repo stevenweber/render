@@ -1,15 +1,13 @@
-# Types define classes of data being interpreted. This is especially important in modeling fake data.
+# Render::Type defines classes for JSON Types and Formats.
 # Add additional types for your specific needs, along with a generator to create fake data for it.
 
 require "uuid"
+require "date"
+require "ipaddr"
 
 module Render
   module Type
     @instances = {}
-
-    class Enum; end
-    class Boolean; end
-    class Date; end
 
     class << self
       attr_accessor :instances
@@ -24,6 +22,8 @@ module Render
 
       def parse(name, raise_error = false)
         return name unless name.is_a?(String)
+        return nil if (name == "null")
+
         Render::Type.find(name) || Object.const_get(name.capitalize)
       rescue NameError
         raise Errors::InvalidType.new(name) if raise_error
@@ -55,11 +55,31 @@ module Render
       end
     end
 
-    add!(:uuid, UUID)
+    class Enum; end
+    class Boolean; end
+    class Date; end
+    class Hostname < String; end
+    class Email < String; end
+    class IPv4 < IPAddr; end
+    class IPv6 < IPAddr; end
+
+    # Standard types
     add!(:number, Float)
-    add!(:time, Time)
-    add_render_specific_type!(:Boolean)
+    add!(:null, nil)
     add_render_specific_type!(:Enum)
+    add_render_specific_type!(:Boolean)
+
+    # Standard formats
+    add!(:uri, URI)
+    add!("date-time".to_sym, DateTime)
+    add_render_specific_type!(:IPv4)
+    add_render_specific_type!(:IPv6)
+    add_render_specific_type!(:Email)
+    add_render_specific_type!(:Hostname)
+
+    # Extended
+    add!(:uuid, UUID)
     add_render_specific_type!(:Date)
+
   end
 end

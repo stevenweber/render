@@ -28,9 +28,23 @@ module Render
     end
 
     describe ".trigger" do
+      context "no generator" do
+        it "returns nil" do
+          attribute = double(:attribute, { name: "foo" })
+          Generator.trigger(:foo, "_to_match", attribute).should == nil
+        end
+
+        it "warns" do
+          Render.logger.should_receive(:warn).with(/find.*generator.*foo.*_to_match/i)
+
+          attribute = double(:attribute, { name: "foo" })
+          Generator.trigger(:foo, "_to_match", attribute).should == nil
+        end
+      end
+
       it "triggers matching generator for Render types" do
-        enum_attribute = HashAttribute.new({ attribute_name: { type: String, enum: ["foo"] } })
-        Generator.trigger(:enum, "anything", enum_attribute).should == "foo"
+        enum_attribute = HashAttribute.new({ name: { type: String, enum: ["foo"] } })
+        Generator.trigger(enum_attribute.bias_type, "anything", enum_attribute).should == "foo"
       end
     end
 

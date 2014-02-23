@@ -21,6 +21,25 @@ module Render
     end
 
     describe ".parse!" do
+      it "returns ruby classes for standard json types" do
+        Type.parse!("string").should == String
+        Type.parse!("number").should == Float
+        Type.parse!("integer").should == Integer
+        Type.parse!("object").should == Object
+        Type.parse!("array").should == Array
+        Type.parse!("boolean").should == Type::Boolean
+        Type.parse!("null").should == nil
+      end
+
+      it "returns ruby classes for standard json formats" do
+        Type.parse!("uri").should == URI
+        Type.parse!("date-time").should == DateTime
+        Type.parse!("ipv4").should == Type::IPv4
+        Type.parse!("ipv6").should == Type::IPv6
+        Type.parse!("email").should == Type::Email
+        Type.parse!("hostname").should == Type::Hostname
+      end
+
       it "returns constant for string" do
         Type.parse("integer").should == Integer
       end
@@ -48,18 +67,6 @@ module Render
         it "returns UUID for uuid" do
           Type.parse("uUId").should == UUID
         end
-
-        it "returns Boolean for boolean" do
-          Type.parse("boolean").should == Render::Type::Boolean
-        end
-
-        it "returns Float for number" do
-          Type.parse("FloAt").should == Float
-        end
-
-        it "returns Time for date-time" do
-          Type.parse("date-time").should == Time
-        end
       end
     end
 
@@ -72,7 +79,7 @@ module Render
         Type.find(:foo).should_not be
       end
 
-      describe "user type" do
+      describe "user types" do
         before(:each) do
           @original_types = Type.instances.dup
           module ::Foo; module Boolean; end; end

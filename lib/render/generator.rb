@@ -3,6 +3,7 @@
 
 require "uuid"
 require "render/errors"
+require "render/type"
 require "date"
 
 module Render
@@ -25,12 +26,17 @@ module Render
 
       def trigger(type, to_match, algorithm_argument = nil)
         generator = find(type, to_match)
-        generator.trigger(algorithm_argument)
+        if generator
+          generator.trigger(algorithm_argument)
+        else
+          Render.logger.warn("Could not find generator for type #{type} with matcher for #{to_match}, using nil")
+          nil
+        end
       end
 
       def find(type, to_match)
         instances.detect do |generator|
-          generator.type.to_s.match(/#{type}/i) && to_match.match(generator.matcher)
+          (type == generator.type) && to_match.to_s.match(generator.matcher)
         end
       end
     end
@@ -57,14 +63,24 @@ module Render
       end
     end
 
-    # Default set to ensure each type can generate fake data.
+    # Ensure each type can generate fake data.
+    # Standard JSON types
     Generator.create!(String, /.*/, proc { |attribute| "#{attribute.name} (generated)" })
+    Generator.create!(Type::Boolean, /.*/, proc { [true, false].sample })
     Generator.create!(Integer, /.*/, proc { rand(100) })
-    Generator.create!(Float, /.*/, proc { rand(0.1..99).round(2) })
+    Generator.create!(Float, /.*/, proc { rand(0.1..99).round(2) }) # parsed from number
+    Generator.create!(nil, /.*/, proc {}) # parsed from null
+    # Standard JSON formats
+    Generator.create!(DateTime, /.*/, proc { DateTime.now.to_s })
+    Generator.create!(URI, /.*/, proc { "http://localhost" })
+    Generator.create!(Type::Hostname, /.*/, proc { "localhost" })
+    Generator.create!(Type::Email, /.*/, proc { "you@localhost" })
+    Generator.create!(Type::IPv4, /.*/, proc { "127.0.0.1" })
+    Generator.create!(Type::IPv6, /.*/, proc { "::1" })
+    Generator.create!(Type::Enum, /.*/, proc { |attribute| attribute.enums.sample })
+    # Extended
     Generator.create!(UUID, /.*/, proc { UUID.generate })
     Generator.create!(Time, /.*/, proc { |attribute| time = Time.now; (attribute.type == String) ? time.to_s : time })
-    Generator.create!(Type::Boolean, /.*/, proc { [true, false].sample })
-    Generator.create!(Type::Enum, /.*/, proc { |attribute| attribute.enums.sample })
     Generator.create!(Type::Date, /.*/, proc { Time.now.to_date })
   end
 end
