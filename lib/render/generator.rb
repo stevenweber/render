@@ -70,9 +70,25 @@ module Render
       max_length = (attribute.max_length.to_i - 1)
       "#{attribute.name} (generated)".ljust(min_length, "~")[0..max_length]
     })
+
+    Generator.create!(Integer, /.*/, proc { |attribute|
+      if attribute.multiple_of
+        attribute.multiple_of * rand(1..2)
+      else
+        rand(100)
+      end
+    })
+
+    # parsed from number
+    Generator.create!(Float, /.*/, proc { |attribute|
+      if attribute.multiple_of
+        attribute.multiple_of * rand(1..2)
+      else
+        rand(0.1..99).round(2)
+      end
+    })
+
     Generator.create!(Type::Boolean, /.*/, proc { [true, false].sample })
-    Generator.create!(Integer, /.*/, proc { rand(100) })
-    Generator.create!(Float, /.*/, proc { rand(0.1..99).round(2) }) # parsed from number
     Generator.create!(nil, /.*/, proc {}) # parsed from null
     # Standard JSON formats
     Generator.create!(DateTime, /.*/, proc { DateTime.now.to_s })

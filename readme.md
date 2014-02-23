@@ -40,7 +40,6 @@ It will however,
 - The following keywords:
   - anyOf/allOf/oneOf/not
   - minimum/exclusiveMinimum/maximum/exclusiveMaximum
-  - multipleOf
   - pattern/patternProperties
   - uniqueItems
 - Tuples of varying types, e.g. [3, { name: "bob" }]

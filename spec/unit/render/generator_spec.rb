@@ -81,18 +81,30 @@ module Render
     end
 
     describe "default set" do
-      it "adheres to minLength" do
+      it "Strings adhere to minLength" do
         min_length = 100
         attribute = HashAttribute.new({ name: { type: String, minLength: min_length } })
         value = Generator.trigger(String, "_to_match", attribute)
         value.length.should >= min_length
       end
 
-      it "adheres to maxLength" do
+      it "Strings adhere to maxLength" do
         max_length = 2
         attribute = HashAttribute.new({ name: { type: String, maxLength: max_length } })
         value = Generator.trigger(String, "_to_match", attribute)
         value.length.should <= max_length
+      end
+
+      it "Integers adhere to multipleOf" do
+        attribute = HashAttribute.new({ name: { type: "integer", multipleOf: 13 } })
+        value = Generator.trigger(attribute.type, "_to_match", attribute)
+        (value % 13).should eq(0)
+      end
+
+      it "Numbers adhere to multipleOf" do
+        attribute = HashAttribute.new({ name: { type: "number", multipleOf: 1.3 } })
+        value = Generator.trigger(attribute.type, "_to_match", attribute)
+        (value % 1.3).should eq(0)
       end
     end
   end

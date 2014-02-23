@@ -10,7 +10,8 @@ module Render
       :enums,
       :format,
       :min_length,
-      :max_length
+      :max_length,
+      :multiple_of
 
     attr_writer :default
 
@@ -44,6 +45,7 @@ module Render
       @default = options[:default]
       self.min_length = options[:minLength]
       self.max_length = options[:maxLength]
+      self.multiple_of = options[:multipleOf]
     end
 
     def faux_value
