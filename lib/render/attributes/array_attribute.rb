@@ -4,13 +4,17 @@ module Render
   class ArrayAttribute < Attribute
     FAUX_DATA_UPPER_LIMIT = 5.freeze
 
-    attr_accessor :archetype
+    attr_accessor :archetype,
+      :min_items,
+      :max_items
 
     def initialize(options = {})
       super
 
       self.name = options.fetch(:title, :render_array_attribute_untitled).to_sym
-      self.required = options.fetch(:required, nil)
+      self.min_items = options[:minItems] || 0
+      self.max_items = options[:maxItems]
+
       options = options.fetch(:items)
       process_type!(options)
 
@@ -37,14 +41,10 @@ module Render
     private
 
     def faux_array_data
-      rand(lower_limit..FAUX_DATA_UPPER_LIMIT).times.collect do
+      faux_max = max_items || FAUX_DATA_UPPER_LIMIT
+      rand(min_items..faux_max).times.collect do
         archetype ? nil : {}
       end
     end
-
-    def lower_limit
-      required ? 1 : 0
-    end
-
   end
 end

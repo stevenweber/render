@@ -29,7 +29,8 @@ module Render
     describe "#faux_data" do
       before(:each) do
         Render.stub({ live: false })
-        @attribute = ArrayAttribute.new({ items: { type: Float, required: true } })
+        @lower_limit = 6
+        @attribute = ArrayAttribute.new({ items: { type: Float }, minItems: @lower_limit })
       end
 
       it "uses explicit value for faux data" do
@@ -38,13 +39,11 @@ module Render
       end
 
       it "generates fake number of elements" do
-        lower_limit = 6
         upper_limit = 9
-        @attribute.stub({ lower_limit: lower_limit })
         stub_const("Render::ArrayAttribute::FAUX_DATA_UPPER_LIMIT", upper_limit)
 
         faux_data = @attribute.serialize
-        faux_data.size.should >= lower_limit
+        faux_data.size.should >= @lower_limit
         faux_data.size.should <= upper_limit
         faux_data.sample.class.should == Float
       end

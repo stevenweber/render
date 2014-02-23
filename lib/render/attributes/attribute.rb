@@ -8,12 +8,10 @@ module Render
       :type,
       :schema,
       :enums,
-      :format,
-      :required
+      :format
 
     def initialize(options = {})
       Render.logger.debug("Initializing attribute #{options}")
-      self.required = false
     end
 
     def bias_type

@@ -53,6 +53,18 @@ module Render
     end
 
     class Schema
+      class InvalidRequire < StandardError
+        attr_accessor :attribute_name
+
+        def initialize(attribute_name)
+          self.attribute_name = attribute_name
+        end
+
+        def to_s
+          "Could not require #{attribute_name} becuase it's not defined in the schema."
+        end
+      end
+
       class RequestError < StandardError
         attr_accessor :endpoint, :response
 

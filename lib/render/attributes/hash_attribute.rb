@@ -3,12 +3,15 @@ require "render/attributes/attribute"
 
 module Render
   class HashAttribute < Attribute
+    attr_accessor :required
+
     def initialize(options = {})
       super
 
       self.name = options.keys.first
       options = options[name]
       process_type!(options)
+      self.required = !!options[:required]
 
       initialize_schema!(options) if nested_schema?(options)
     end

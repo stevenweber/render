@@ -4,6 +4,7 @@
 require "uuid"
 require "date"
 require "ipaddr"
+require "uri"
 
 module Render
   module Type

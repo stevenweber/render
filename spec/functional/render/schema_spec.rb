@@ -53,5 +53,33 @@ module Render
         schema.serialize!(films).should == films
       end
     end
+
+    describe "required" do
+      # +Standard
+      it "is set with HashAttribute-level keyword" do
+        schema = Schema.new({
+          type: Object,
+          properties: {
+            name: { type: String, required: true },
+          }
+        })
+
+        schema.hash_attributes.first.required.should be
+      end
+
+      it "is set on schema-level keyword" do
+        schema = Schema.new({
+          type: Object,
+          properties: {
+            name: { type: String },
+            address: { type: String },
+          },
+          required: [:address]
+        })
+
+        schema.attributes[0].required.should_not be
+        schema.attributes[1].required.should be
+      end
+    end
   end
 end

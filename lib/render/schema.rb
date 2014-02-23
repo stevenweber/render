@@ -28,11 +28,17 @@ module Render
       self.type = Type.parse(definition[:type]) || Object
       self.universal_title = definition.fetch(:universal_title, nil)
 
-      if definition.keys.include?(:items)
+      if array_schema?
         self.array_attribute = ArrayAttribute.new(definition)
       else
         self.hash_attributes = definition.fetch(:properties).collect do |name, attribute_definition|
           HashAttribute.new({ name => attribute_definition })
+        end
+
+        definition.fetch(:required, []).each do |required_attribute|
+          attribute = attributes.detect { |attribute| attribute.name == required_attribute.to_sym }
+          raise Errors::Schema::InvalidRequire.new(required_attribute) unless attribute
+          attribute.required = true
         end
       end
     end
@@ -59,7 +65,15 @@ module Render
       self.rendered_data = Extensions::DottableHash.new(hash_with_title_prefixes(serialized_data))
     end
 
+    def attributes
+      array_schema? ? array_attributes : hash_attributes
+    end
+
     private
+
+    def array_schema?
+      definition.keys.include?(:items)
+    end
 
     def determine_definition(definition_or_title)
       if (definition_or_title.is_a?(Hash) && !definition_or_title.empty?)
