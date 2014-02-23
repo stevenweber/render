@@ -26,7 +26,7 @@ module Render
       end
     end
 
-    describe "serialize" do
+    describe "#serialize" do
       it "returns value as defined type" do
         attribute = ArrayAttribute.new({ items: { type: Float } })
         attribute.serialize(["2.0"]).should == [2.0]
@@ -39,6 +39,16 @@ module Render
         attribute.stub({ default_value: "2" })
 
         attribute.serialize.should == [2.0]
+      end
+
+      it "enforces uniqueness" do
+        attribute = ArrayAttribute.new({ items: { type: Integer }, uniqueItems: true })
+        attribute.serialize(["2.0", 2, "2"]).should == [2]
+      end
+
+      it "does not enforce uniqueness" do
+        attribute = ArrayAttribute.new({ items: { type: Integer } })
+        attribute.serialize(["2.0", 2, "2"]).should == [2, 2, 2]
       end
     end
 

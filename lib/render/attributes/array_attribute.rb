@@ -6,7 +6,8 @@ module Render
 
     attr_accessor :archetype,
       :min_items,
-      :max_items
+      :max_items,
+      :unique
 
     def initialize(options = {})
       super
@@ -14,6 +15,7 @@ module Render
       self.name = options.fetch(:title, :render_array_attribute_untitled).to_sym
       self.min_items = options[:minItems] || 0
       self.max_items = options[:maxItems]
+      self.unique = !!options[:uniqueItems]
 
       options = options.fetch(:items)
       process_options!(options)
@@ -27,7 +29,7 @@ module Render
 
     def serialize(explicit_values = nil)
       explicit_values = faux_array_data if (Render.live == false && explicit_values.nil?)
-      if archetype
+      values = if archetype
         explicit_values.collect do |value|
           value = (value || default_value)
           Type.to(type, value)
@@ -37,6 +39,8 @@ module Render
           schema.serialize!(value)
         end
       end
+
+      unique ? values.uniq : values
     end
 
     private

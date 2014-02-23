@@ -35,13 +35,13 @@ It will however,
 
 ## Roadmap
 
-- Leveraging $ref for nested schemas
-- Enhance Graph to Graph relationships
-- Variable types, i.e. { type: [String, Float] }
-- The following keywords:
+- Enhanced nesting
+  - Leveraging $ref for nesting
+  - Relationship calculation between nested elements
+- The following keyword implementations:
   - anyOf/allOf/oneOf/not
   - pattern/patternProperties
-  - uniqueItems
+  - Variable types, i.e. { type: [String, Float] }
 - Tuples of varying types, e.g. [3, { name: "bob" }]
 - Relating to requests
   - Custom options, e.g. headers, timeouts
