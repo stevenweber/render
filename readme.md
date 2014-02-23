@@ -16,17 +16,60 @@ Update your Gemfile:
 
 Check out examples as part of the [integration tests](spec/integration/render).
 
+```ruby
+# Make requests
+Render::Definition.load_from_directory!("/path/to/json/schema/dir")
+Render::Graph.new(:universal_title, { host: "films.local" }).render!
+
+# Or mock data
+Render.live = false
+schema = {
+  title: :person,
+  type: :object,
+  properties: {
+    name: { type: :string, minLength: 1 },
+    email: { type: :string, format: :email },
+    sex: { type: :string, enum: %w(MALE FEMALE) },
+    address: {
+      type: :object,
+      properties: {
+        number: { type: :integer },
+        street: { type: :string }
+      }
+    },
+    nicknames: {
+      type: :array,
+      minItems: 1,
+      maxItems: 1,
+      items: { type: :string }
+    }
+  }
+}
+
+Render::Schema.new(schema).render!
+# => {
+#   :person=> {
+#     :name => "name (generated)",
+#     :email => "you@localhost",
+#     :sex => "FEMALE",
+#     :address => {
+#       :number => 513948,
+#       :street => "street (generated)"
+#     },
+#     :nicknames => ["nicknames (generated)"]
+#   }
+# }
+```
+
 ## Caveats/Notes/Assumptions
 
-- Currently under initial development
 - Assumes additionalProperties is always false
   - It would be impossible to model reponses otherwise
   - Additional response data does not affect what's been defined
 
 Render is not meant to be a validator. As such, it does not care about:
 
-  - dependencies (validating one attribute's presence on another's)
-  - minProperties/maxProperties (either define it, or it's not worth caring about)
+  - Keywords that do not strictly define schemas: `anyOf`, `allOf`, `oneOf`, `not`, `minProperties`, `maxProperties`, `dependencies`
   - Divergent responses, e.g. no errors will be raised if "abc" is returned for String with { "minLength": 4 }
 
 It will however,
@@ -39,10 +82,8 @@ It will however,
   - Leveraging $ref for nesting
   - Relationship calculation between nested Graphs
 - The following keyword implementations:
-  - anyOf/allOf/oneOf/not
   - pattern/patternProperties
-  - Variable types, i.e. { type: [String, Float] }
-- Tuples of varying types, e.g. [3, { name: "bob" }]
+  - Tuples of varying types, e.g. [3, { name: "bob" }]
 - Relating to requests
   - Custom options, e.g. headers, timeouts
   - Drop-in custom requesting

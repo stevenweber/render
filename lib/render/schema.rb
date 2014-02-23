@@ -21,7 +21,6 @@ module Render
 
     def initialize(definition_or_title)
       Render.logger.debug("Loading #{definition_or_title}")
-
       self.definition = determine_definition(definition_or_title)
       title_or_default = definition.fetch(:title, DEFAULT_TITLE)
       self.title = title_or_default.to_sym

@@ -22,7 +22,7 @@ module Render
       end
 
       def parse(name, raise_error = false)
-        return name unless name.is_a?(String)
+        return name unless name.is_a?(String) || name.is_a?(Symbol)
         return nil if (name == "null")
 
         Render::Type.find(name) || Object.const_get(name.capitalize)

@@ -15,6 +15,10 @@ module Render
         Type.parse("integer").should == Integer
       end
 
+      it "returns constant for symbols" do
+        Type.parse(:integer).should == Integer
+      end
+
       it "returns nil if no type is found" do
         Type.parse("not-a-type").should == nil
       end
