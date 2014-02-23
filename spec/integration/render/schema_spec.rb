@@ -67,7 +67,7 @@ module Render
           },
           tags: {
             type: Array,
-            required: true,
+            minItems: 1,
             items: {
               type: Object,
               properties: {

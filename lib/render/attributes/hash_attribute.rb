@@ -10,7 +10,8 @@ module Render
 
       self.name = options.keys.first
       options = options[name]
-      process_type!(options)
+
+      process_options!(options)
       self.required = !!options[:required]
 
       initialize_schema!(options) if nested_schema?(options)

@@ -65,7 +65,11 @@ module Render
 
     # Ensure each type can generate fake data.
     # Standard JSON types
-    Generator.create!(String, /.*/, proc { |attribute| "#{attribute.name} (generated)" })
+    Generator.create!(String, /.*/, proc { |attribute|
+      min_length = attribute.min_length || -1
+      max_length = (attribute.max_length.to_i - 1)
+      "#{attribute.name} (generated)".ljust(min_length, "~")[0..max_length]
+    })
     Generator.create!(Type::Boolean, /.*/, proc { [true, false].sample })
     Generator.create!(Integer, /.*/, proc { rand(100) })
     Generator.create!(Float, /.*/, proc { rand(0.1..99).round(2) }) # parsed from number

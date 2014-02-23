@@ -11,6 +11,16 @@ module Render
       end
 
       describe "#default_value" do
+        it "returns default value defined by schema" do
+          schema_default = "foo"
+          attribute = HashAttribute.new({ name: { type: String, default: schema_default } })
+
+          Render.stub({ live: false })
+          attribute.default_value.should == schema_default
+          Render.stub({ live: true })
+          attribute.default_value.should == schema_default
+        end
+
         it "returns fake data from matching generator" do
           name = "Canada Dry"
           Generator.create!(String, %r{.*name.*}, proc { name })

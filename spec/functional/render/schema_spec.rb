@@ -55,7 +55,7 @@ module Render
     end
 
     describe "required" do
-      # +Standard
+      # Not defined in spec, but should have been
       it "is set with HashAttribute-level keyword" do
         schema = Schema.new({
           type: Object,

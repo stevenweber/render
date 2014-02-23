@@ -79,5 +79,21 @@ module Render
         Generator.new(UUID, //, algorithm).trigger(x).should == algorithm.call(x)
       end
     end
+
+    describe "default set" do
+      it "adheres to minLength" do
+        min_length = 100
+        attribute = HashAttribute.new({ name: { type: String, minLength: min_length } })
+        value = Generator.trigger(String, "_to_match", attribute)
+        value.length.should >= min_length
+      end
+
+      it "adheres to maxLength" do
+        max_length = 2
+        attribute = HashAttribute.new({ name: { type: String, maxLength: max_length } })
+        value = Generator.trigger(String, "_to_match", attribute)
+        value.length.should <= max_length
+      end
+    end
   end
 end

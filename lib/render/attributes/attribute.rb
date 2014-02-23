@@ -8,7 +8,11 @@ module Render
       :type,
       :schema,
       :enums,
-      :format
+      :format,
+      :min_length,
+      :max_length
+
+    attr_writer :default
 
     def initialize(options = {})
       Render.logger.debug("Initializing attribute #{options}")
@@ -19,7 +23,7 @@ module Render
     end
 
     def default_value
-      Render.live ? nil : faux_value
+      @default || (Render.live ? nil : faux_value)
     end
 
     def nested_schema?(options = {})
@@ -28,7 +32,7 @@ module Render
 
     private
 
-    def process_type!(options)
+    def process_options!(options)
       self.type = Type.parse!(options[:type])
       self.format = Type.parse(options[:format])
 
@@ -36,6 +40,10 @@ module Render
         self.enums = options[:enum]
         self.format = Type::Enum
       end
+
+      @default = options[:default]
+      self.min_length = options[:minLength]
+      self.max_length = options[:maxLength]
     end
 
     def faux_value

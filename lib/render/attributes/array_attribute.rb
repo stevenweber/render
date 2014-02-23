@@ -16,7 +16,7 @@ module Render
       self.max_items = options[:maxItems]
 
       options = options.fetch(:items)
-      process_type!(options)
+      process_options!(options)
 
       if options.keys.include?(:properties)
         self.schema = Schema.new(options)
