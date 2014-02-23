@@ -32,7 +32,7 @@ module Render
       values = if archetype
         explicit_values.collect do |value|
           value = (value || default_value)
-          Type.to(type, value)
+          Type.to(types, value)
         end
       else
         explicit_values.collect do |value|

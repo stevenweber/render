@@ -99,52 +99,61 @@ module Render
 
     describe ".to" do
       it "maintains nil values" do
-        Type.to(Float, nil).should == nil
+        Type.to([Float], nil).should == nil
       end
 
       it "converts to floats" do
-        Type.to(Float, "2").should == 2
+        Type.to([Float], "2").should == 2
       end
 
       it "converts to Integers" do
-        Type.to(Integer, "1.2").should == 1
+        Type.to([Integer], "1.2").should == 1
       end
 
       it "converts to Strings" do
-        Type.to(String, 2).should == "2"
+        Type.to([String], 2).should == "2"
       end
 
       describe "enum" do
         it "returns valid enum" do
           enums = [:foo, :bar]
-          Type.to(Type::Enum, :foo, enums).should == :foo
+          Type.to([Type::Enum], :foo, enums).should == :foo
         end
 
         it "return nil for invalid enums" do
           enums = [:foo]
-          Type.to(Type::Enum, :bar, enums).should == nil
+          Type.to([Type::Enum], :bar, enums).should == nil
         end
       end
 
       describe "boolean" do
         it "converts strings" do
-          Type.to(Type::Boolean, "true").should eq(true)
-          Type.to(Type::Boolean, "false").should eq(false)
+          Type.to([Type::Boolean], "true").should eq(true)
+          Type.to([Type::Boolean], "false").should eq(false)
         end
 
         it "returns nil for invalid booleans" do
-          Type.to(Type::Boolean, "foo").should == nil
+          Type.to([Type::Boolean], "foo").should == nil
         end
       end
 
       it "returns value for unknown types" do
         class Foo; end
 
-        Type.to(Foo, :bar).should == :bar
+        Type.to([Foo], :bar).should == :bar
 
         Render.send(:remove_const, :Foo)
       end
 
+      context "multiple types" do
+        it "returns value in original type if valid" do
+          Type.to([Integer, Float], 2.0).should == 2.0
+        end
+
+        it "returns value of first class if original type is not valid" do
+          Type.to([Integer, String], 2.0).should == 2
+        end
+      end
 
     end
   end

@@ -37,7 +37,7 @@ It will however,
 
 - Enhanced nesting
   - Leveraging $ref for nesting
-  - Relationship calculation between nested elements
+  - Relationship calculation between nested Graphs
 - The following keyword implementations:
   - anyOf/allOf/oneOf/not
   - pattern/patternProperties

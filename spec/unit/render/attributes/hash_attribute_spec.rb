@@ -12,17 +12,17 @@ module Render
         it "is set from options" do
           type = Integer
           attribute = HashAttribute.new({ key_name: { type: type } })
-          attribute.type.should == type
+          attribute.types.should == [type]
         end
 
         it "is set from name hash" do
           type = String
           attribute = HashAttribute.new({ id: { type: UUID } })
-          attribute.type.should == UUID
+          attribute.types.should == [UUID]
         end
 
         it "determines type from string" do
-          HashAttribute.new({ key_name: { type: "string" } }).type.should == String
+          HashAttribute.new({ key_name: { type: "string" } }).types.should == [String]
         end
       end
 
@@ -58,7 +58,7 @@ module Render
           hash_attributes.size.should == 1
           attribute = hash_attributes.first
           attribute.name.should == :year
-          attribute.type.should == Integer
+          attribute.types.should == [Integer]
         end
       end
 

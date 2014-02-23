@@ -12,6 +12,19 @@ module Render
           faux_value.should include(name)
         end
       end
+
+      describe "#bias_type" do
+        it "biases the format" do
+          attribute = HashAttribute.new({ name: { type: String, format: UUID } })
+          attribute.bias_type.should eq(UUID)
+        end
+
+        it "biases the first type" do
+          attribute = HashAttribute.new({ name: { type: [String, Integer] } })
+          attribute.bias_type.should eq(String)
+        end
+      end
+
     end
   end
 end

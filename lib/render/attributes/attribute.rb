@@ -5,7 +5,7 @@ module Render
     SCHEMA_IDENTIFIERS = [:properties, :items].freeze
 
     attr_accessor :name,
-      :type,
+      :types,
       :schema,
       :enums,
       :format,
@@ -24,7 +24,7 @@ module Render
     end
 
     def bias_type
-      format || type
+      format || types.first
     end
 
     def default_value
@@ -38,7 +38,7 @@ module Render
     private
 
     def process_options!(options)
-      self.type = Type.parse!(options[:type])
+      self.types = [Type.parse!(options[:type])].flatten
       self.format = Type.parse(options[:format])
 
       if (options[:enum])

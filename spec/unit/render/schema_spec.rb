@@ -52,7 +52,7 @@ module Render
           }
 
           attribute = Schema.new(archetype_schema).array_attribute
-          attribute.type.should == String
+          attribute.types.should == [String]
           attribute.archetype.should == true
         end
       end
@@ -69,8 +69,8 @@ module Render
 
           schema = Schema.new(simple_schema)
           schema.hash_attributes.size.should == 2
-          schema.hash_attributes.any? { |a| a.name == :name && a.type == String }.should == true
-          schema.hash_attributes.any? { |a| a.name == :genre && a.type == String }.should == true
+          schema.hash_attributes.any? { |a| a.name == :name && a.types == [String] }.should == true
+          schema.hash_attributes.any? { |a| a.name == :genre && a.types == [String] }.should == true
         end
       end
     end

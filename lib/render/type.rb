@@ -34,10 +34,11 @@ module Render
         parse(name, true)
       end
 
-      def to(klass, value, enums = nil)
+      def to(classes, value, enums = nil)
         return nil if value.nil?
+        return value if classes.any? { |klass| value.is_a?(klass) }
 
-        case(klass.name)
+        case(classes.first.name)
         when Float.name
           value.to_f
         when Integer.name
