@@ -9,6 +9,7 @@ require "date"
 module Render
   class Generator
     @instances = []
+    FAUX_DATA_MAX = 1_000_000.freeze
 
     class << self
       attr_accessor :instances
@@ -63,6 +64,15 @@ module Render
       end
     end
 
+
+    def self.least_multiple(multiple_of, min)
+      lowest_multiple = multiple_of
+      until (lowest_multiple > min)
+        lowest_multiple += multiple_of
+      end
+      lowest_multiple
+    end
+
     # Ensure each type can generate fake data.
     # Standard JSON types
     Generator.create!(String, /.*/, proc { |attribute|
@@ -72,19 +82,32 @@ module Render
     })
 
     Generator.create!(Integer, /.*/, proc { |attribute|
+      min = attribute.minimum.to_i
+      max = attribute.maximum || FAUX_DATA_MAX
+      min += 1 if attribute.exclusive_minimum
+      max -= 1 if attribute.exclusive_maximum
+
       if attribute.multiple_of
-        attribute.multiple_of * rand(1..2)
+        least_multiple(attribute.multiple_of, min)
       else
-        rand(100)
+        rand(min..max)
       end
     })
 
     # parsed from number
     Generator.create!(Float, /.*/, proc { |attribute|
+      rounding_factor = 2
+      least_significant_number = 10 ** -rounding_factor
+
+      min = attribute.minimum.to_f
+      max = attribute.maximum || FAUX_DATA_MAX
+      min += least_significant_number if attribute.exclusive_minimum
+      max -= least_significant_number if attribute.exclusive_maximum
+
       if attribute.multiple_of
-        attribute.multiple_of * rand(1..2)
+        least_multiple(attribute.multiple_of, min)
       else
-        rand(0.1..99).round(2)
+        rand(min..max).round(rounding_factor)
       end
     })
 

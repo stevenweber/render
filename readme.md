@@ -39,7 +39,6 @@ It will however,
 - Variable types, i.e. { type: [String, Float] }
 - The following keywords:
   - anyOf/allOf/oneOf/not
-  - minimum/exclusiveMinimum/maximum/exclusiveMaximum
   - pattern/patternProperties
   - uniqueItems
 - Tuples of varying types, e.g. [3, { name: "bob" }]

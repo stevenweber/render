@@ -81,31 +81,89 @@ module Render
     end
 
     describe "default set" do
-      it "Strings adhere to minLength" do
-        min_length = 100
-        attribute = HashAttribute.new({ name: { type: String, minLength: min_length } })
-        value = Generator.trigger(String, "_to_match", attribute)
-        value.length.should >= min_length
+      describe String do
+        it "adheres to minLength" do
+          min_length = 100
+          attribute = HashAttribute.new({ name: { type: String, minLength: min_length } })
+          value = Generator.trigger(String, "_to_match", attribute)
+          value.length.should >= min_length
+        end
+
+        it "adheres to maxLength" do
+          max_length = 2
+          attribute = HashAttribute.new({ name: { type: String, maxLength: max_length } })
+          value = Generator.trigger(String, "_to_match", attribute)
+          value.length.should <= max_length
+        end
       end
 
-      it "Strings adhere to maxLength" do
-        max_length = 2
-        attribute = HashAttribute.new({ name: { type: String, maxLength: max_length } })
-        value = Generator.trigger(String, "_to_match", attribute)
-        value.length.should <= max_length
+      describe Integer do
+        it "adheres to multipleOf" do
+          attribute = HashAttribute.new({ name: { type: "integer", multipleOf: 13 } })
+          value = Generator.trigger(attribute.type, "_to_match", attribute)
+          (value % 13).should eq(0)
+        end
+
+        it "adheres to minimum" do
+          attribute = HashAttribute.new({ name: { type: "integer", minimum: 100 } })
+          value = Generator.trigger(attribute.type, "_to_match", attribute)
+          value.should > 100
+        end
+
+        it "adheres to maximum" do
+          attribute = HashAttribute.new({ name: { type: "integer", maximum: 100 } })
+          value = Generator.trigger(attribute.type, "_to_match", attribute)
+          value.should <= 100
+        end
+
+        it "adherse to exclusiveMinimum" do
+          attribute = HashAttribute.new({ name: { type: "integer", minimum: 4, maximum: 5, exclusiveMinimum: true } })
+          Generator.trigger(attribute.type, "_to_match", attribute).should eq(5)
+        end
+
+        it "adherse to exclusiveMaximum" do
+          attribute = HashAttribute.new({ name: { type: "integer", minimum: 4, maximum: 5, exclusiveMaximum: true } })
+          Generator.trigger(attribute.type, "_to_match", attribute).should eq(4)
+        end
+
+        it "adheres to minimum and multipleOf" do
+          attribute = HashAttribute.new({ name: { type: "integer", minimum: 60, maximum: 70, multipleOf: 13 } })
+          value = Generator.trigger(attribute.type, "_to_match", attribute)
+          (value % 13).should eq(0)
+          value.should eq(65)
+        end
       end
 
-      it "Integers adhere to multipleOf" do
-        attribute = HashAttribute.new({ name: { type: "integer", multipleOf: 13 } })
-        value = Generator.trigger(attribute.type, "_to_match", attribute)
-        (value % 13).should eq(0)
+      describe "Numbers (converted to Float)" do
+        it "adheres to multipleOf" do
+          attribute = HashAttribute.new({ name: { type: "number", multipleOf: 1.3 } })
+          value = Generator.trigger(attribute.type, "_to_match", attribute)
+          (value % 1.3).should eq(0)
+        end
+
+        it "adheres to minimum" do
+          attribute = HashAttribute.new({ name: { type: "number", minimum: 100.0 } })
+          value = Generator.trigger(attribute.type, "_to_match", attribute)
+          value.should > 100.0
+        end
+
+        it "adheres to maximum" do
+          attribute = HashAttribute.new({ name: { type: "number", maximum: 100 } })
+          value = Generator.trigger(attribute.type, "_to_match", attribute)
+          value.should <= 100
+        end
+
+        it "adherse to exclusiveMinimum" do
+          attribute = HashAttribute.new({ name: { type: "number", minimum: 99.49, maximum: 99.50, exclusiveMinimum: true } })
+          Generator.trigger(attribute.type, "_to_match", attribute).should eq(99.50)
+        end
+
+        it "adherse to exclusiveMaximum" do
+          attribute = HashAttribute.new({ name: { type: "number", minimum: 99.49, maximum: 99.50, exclusiveMaximum: true } })
+          Generator.trigger(attribute.type, "_to_match", attribute).should eq(99.49)
+        end
       end
 
-      it "Numbers adhere to multipleOf" do
-        attribute = HashAttribute.new({ name: { type: "number", multipleOf: 1.3 } })
-        value = Generator.trigger(attribute.type, "_to_match", attribute)
-        (value % 1.3).should eq(0)
-      end
     end
   end
 end

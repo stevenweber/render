@@ -11,7 +11,11 @@ module Render
       :format,
       :min_length,
       :max_length,
-      :multiple_of
+      :multiple_of,
+      :minimum,
+      :maximum,
+      :exclusive_minimum,
+      :exclusive_maximum
 
     attr_writer :default
 
@@ -46,6 +50,10 @@ module Render
       self.min_length = options[:minLength]
       self.max_length = options[:maxLength]
       self.multiple_of = options[:multipleOf]
+      self.minimum = options[:minimum]
+      self.maximum = options[:maximum]
+      self.exclusive_minimum = !!options[:exclusiveMinimum]
+      self.exclusive_maximum = !!options[:exclusiveMaximum]
     end
 
     def faux_value
