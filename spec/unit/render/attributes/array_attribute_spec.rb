@@ -26,6 +26,22 @@ module Render
       end
     end
 
+    describe "serialize" do
+      it "returns value as defined type" do
+        attribute = ArrayAttribute.new({ items: { type: Float } })
+        attribute.serialize(["2.0"]).should == [2.0]
+      end
+
+      it "returns faux value as defined type" do
+        Render.stub({ live: false })
+
+        attribute = ArrayAttribute.new({ items: { type: Float }, maxItems: 1, minItems: 1 })
+        attribute.stub({ default_value: "2" })
+
+        attribute.serialize.should == [2.0]
+      end
+    end
+
     describe "#faux_data" do
       before(:each) do
         Render.stub({ live: false })

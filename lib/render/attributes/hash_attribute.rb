@@ -37,7 +37,7 @@ module Render
           value = (explicit_value || default_value)
         end
 
-        { name.to_sym => value }
+        { name.to_sym => Type.to(type, value) }
       end
     end
 

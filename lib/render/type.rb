@@ -34,6 +34,26 @@ module Render
         parse(name, true)
       end
 
+      def to(klass, value, enums = nil)
+        return nil if value.nil?
+
+        case(klass.name)
+        when Float.name
+          value.to_f
+        when Integer.name
+          value.to_i
+        when String.name
+          value.to_s
+        when Boolean.name
+          return true if (value == true || value == "true")
+          return false if (value == false || value == "false")
+        when Enum.name
+          (enums & [value]).first
+        else
+          value
+        end
+      end
+
       private
 
       def class_for_name(name)

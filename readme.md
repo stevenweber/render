@@ -20,22 +20,23 @@ Check out examples as part of the [integration tests](spec/integration/render).
 
 - Currently under initial development
 - Assumes additionalProperties is always false
+  - It would be impossible to model reponses otherwise
+  - Additional response data does not affect what's been defined
 
 Render is not meant to be a validator. As such, it does not care about:
 
-  - dependencies (attributes depending on others being present)
-  - minProperties/maxProperties
+  - dependencies (validating one attribute's presence on another's)
+  - minProperties/maxProperties (either define it, or it's not worth caring about)
   - Divergent responses, e.g. no errors will be raised if "abc" is returned for String with { "minLength": 4 }
 
 It will however,
 
-  - Defensively type response values based on definition
+  - Defensively type response values based on definition so you don't run into issues like ("2" > 1)
 
 ## Roadmap
 
-- Leveraging $schema for nested schemas
+- Leveraging $ref for nested schemas
 - Enhance Graph to Graph relationships
-- Defensive type casting
 - Variable types, i.e. { type: [String, Float] }
 - The following keywords:
   - anyOf/allOf/oneOf/not

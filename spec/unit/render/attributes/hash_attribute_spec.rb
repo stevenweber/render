@@ -86,6 +86,18 @@ module Render
         end
       end
 
+      it "returns value as defined type" do
+        attribute = HashAttribute.new({ year: { type: Integer } })
+        attribute.serialize("2").should == { year: 2 }
+      end
+
+      it "returns faux value as defined type" do
+        attribute = HashAttribute.new({ year: { type: Integer } })
+        attribute.stub({ default_value: "2" })
+
+        attribute.serialize(nil).should == { year: 2 }
+      end
+
       context "offline" do
         before(:each) do
           Render.stub({ live: false })
@@ -97,11 +109,9 @@ module Render
           data[:title].should be_a(type)
         end
 
-        it "maintains falsy-ie values when instructed" do
+        it "maintains nil values when instructed" do
           data = HashAttribute.new({ title: { type: Integer } }).serialize(nil, true)
           data[:title].should == nil
-          data = HashAttribute.new({ title: { type: Integer } }).serialize(false, true)
-          data[:title].should == false
         end
       end
     end

@@ -29,7 +29,8 @@ module Render
       explicit_values = faux_array_data if (Render.live == false && explicit_values.nil?)
       if archetype
         explicit_values.collect do |value|
-          value || default_value
+          value = (value || default_value)
+          Type.to(type, value)
         end
       else
         explicit_values.collect do |value|
