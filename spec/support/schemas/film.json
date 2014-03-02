@@ -1,5 +1,5 @@
 {
-  "universal_title": "films_show",
+  "id": "films_show",
   "title": "film",
   "type": "object",
   "endpoint": "http://:host/films/:id",

@@ -13,7 +13,8 @@ module Render
       :graphs,
       :inherited_data,
       :config,
-      :rendered_data
+      :rendered_data,
+      :relationship_info
 
     def initialize(schema_or_definition, options = {})
       self.schema = determine_schema(schema_or_definition)
@@ -21,6 +22,7 @@ module Render
       self.graphs = (options.delete(:graphs) || [])
       self.raw_endpoint = (options.delete(:endpoint) || schema.definition[:endpoint]).to_s
       self.config = options
+      self.relationship_info = {}
 
       self.inherited_data = {}
     end
@@ -29,31 +31,44 @@ module Render
       schema.universal_title || schema.title
     end
 
-    def render!(inherited_properties = nil)
-      self.inherited_data = inherited_properties
+    def process_relationship_info!(data)
+      return if !data
+
+      self.relationship_info = relationships.inject({}) do |info, (parent_key, child_key)|
+        value = data.is_a?(Hash) ? data.fetch(parent_key, nil) : data
+        info.merge!({ child_key => value })
+      end
+    end
+
+    def serialize!(explicit_data = nil, parental_data = nil)
+      process_relationship_info!(parental_data)
+
       if (schema.type == Array)
-        explicit_data = inherited_data
+        schema.render!(explicit_data, endpoint)
       else
-        explicit_data = inherited_data.is_a?(Hash) ? inherited_data : {}
-        explicit_data = explicit_data.merge!(relationship_data_from_parent)
+        explicit_data ||= {}
+        schema.render!(explicit_data.merge(relationship_info), endpoint)
       end
+    end
 
-      graph_data = Extensions::DottableHash.new
-
-      rendered_data = schema.render!(explicit_data, endpoint) do |parent_data|
-        loop_with_configured_threading(graphs) do |graph|
-          if parent_data.is_a?(Array)
-            graph_data[graph.title] = parent_data.inject([]) do |nested_data, element|
-              nested_data << graph.render!(element)[graph.title]
-            end
-          else
-            nested_data = graph.render!(parent_data)
-            graph_data.merge!(nested_data)
-          end
+    def render!(explicit_data = nil, parental_data = nil, as_array = false)
+      if as_array
+        data = parental_data.inject([]) do |accumulator, parental_element|
+          accumulator << serialize!(explicit_data, parental_element)
         end
+      else
+        data = serialize!(explicit_data, parental_data)
       end
 
-      self.rendered_data = graph_data.merge!(rendered_data)
+      loop_with_configured_threading(graphs) do |graph|
+        graph.render!(explicit_data, data, (schema.type == Array))
+      end
+
+      self.rendered_data = graphs.inject(Extensions::DottableHash.new) do |data, graph|
+        data[graph.title] = graph.rendered_data
+      end
+      self.rendered_data[title] = data
+      rendered_data
     end
 
     private
@@ -75,6 +90,14 @@ module Render
       end
 
       uri.to_s
+    end
+
+    def param_key(string)
+      string.match(PARAM)[:param].to_sym
+    end
+
+    def param_value(key)
+      relationship_info[key] || config[key] || raise(Errors::Graph::EndpointKeyNotFound.new(key))
     end
 
     def loop_with_configured_threading(elements)
@@ -99,31 +122,6 @@ module Render
       else
         Schema.new(schema_or_definition)
       end
-    end
-
-    def relationship_data_from_parent
-      relationships.inject({}) do |data, (parent_key, child_key)|
-        data.merge({ child_key => value_from_inherited_data(child_key) })
-      end
-    end
-
-    def param_key(string)
-      string.match(PARAM)[:param].to_sym
-    end
-
-    def param_value(key)
-      value_from_inherited_data(key) || config[key] || raise(Errors::Graph::EndpointKeyNotFound.new(key))
-    end
-
-    def value_from_inherited_data(key)
-      relationships.each do |parent_key, child_key|
-        if !inherited_data.is_a?(Hash)
-          return inherited_data
-        elsif (child_key == key)
-          return inherited_data.fetch(parent_key, nil)
-        end
-      end
-      nil
     end
 
   end

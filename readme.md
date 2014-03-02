@@ -78,8 +78,10 @@ It will however,
 
 ## Roadmap
 
+- Use [URI Template variable expansion]("http://tools.ietf.org/html/rfc6570") instead of symbols
 - Enhanced nesting
   - Leveraging $ref for nesting
+    - Switch from universalTitle to id (and corresponding helper changes, e.g. Schema.new(:title))
   - Relationship calculation between nested Graphs
 - The following keyword implementations:
   - pattern/patternProperties

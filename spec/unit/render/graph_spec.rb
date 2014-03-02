@@ -6,8 +6,8 @@ module Render
   describe Graph do
     before(:each) do
       Render.stub({ live: false })
-      @definition = double(:definition, { :[] => nil })
-      @schema = double(:schema, { type: Hash, definition: @definition })
+      @definition = { type: Object, properties: { foo: { type: String } } }
+      @schema = Schema.new(@definition)
       Schema.stub(:new).with(@definition).and_return(@schema)
     end
 
@@ -62,7 +62,7 @@ module Render
         relationships = { director_id: :id }
 
         graph = Graph.new(@definition, { endpoint: endpoint, relationships: relationships })
-        graph.inherited_data = { director_id: director_id }
+        graph.relationship_info = { id: director_id }
 
         graph.send(:endpoint).should == "http://endpoint.local/directors/#{director_id}"
       end
@@ -88,11 +88,10 @@ module Render
     describe "#render" do
       it "returns its schema's data" do
         serialized_data = { id: UUID.generate }
-        pull = { film: serialized_data }
-        @schema.stub({ render!: pull, serialized_data: serialized_data })
+        @schema.stub({ render!: serialized_data })
 
         graph = Graph.new(@definition)
-        graph.render!.should == pull
+        graph.render!.should == { untitled: serialized_data }
       end
 
       it "returns a dottable hash" do
@@ -108,7 +107,7 @@ module Render
         client_id = UUID.generate
         graph = Graph.new(@definition, { endpoint: endpoint, client_id: client_id })
 
-        @schema.should_receive(:render!).with(anything, graph.send(:endpoint)).and_return({})
+        @schema.should_receive(:render!).with(anything, "http://endpoint.local/?client_id=#{client_id}")
         graph.render!
       end
 
@@ -144,7 +143,7 @@ module Render
           film.graphs << Graph.new(@director_schema, { endpoint: endpoint, relationships: relationships })
 
           film_data = { director_id: @director_id }
-          @film_schema.should_receive(:render!).and_yield(film_data).and_return(film_data)
+          @film_schema.should_receive(:render!).and_return(film_data)
 
           endpoint = "http://endpoint.local/directors/#{@director_id}"
           @director_schema.should_receive(:render!).with(anything, endpoint).and_return({})
@@ -169,7 +168,7 @@ module Render
           first_film_id = UUID.generate
           second_film_id = UUID.generate
           films_response = [{ id: first_film_id }, { id: second_film_id }]
-          films_schema.should_receive(:render!).and_yield(films_response).and_return({ films: films_response })
+          films_schema.should_receive(:render!).and_return(films_response)
 
           response = films.render!
           response.film.should be_a(Array)
@@ -179,7 +178,7 @@ module Render
         it "uses parent data for childrens' properties when explicitly used" do
           director = Graph.new(@director_schema, { relationships: { director_id: :id } })
           film = Graph.new(@film_schema, { graphs: [director] })
-          @film_schema.should_receive(:render!).and_yield({ director_id: @director_id }).and_return({})
+          @film_schema.should_receive(:render!).and_return({ director_id: @director_id })
 
           film.render!.director.id.should == @director_id
         end
@@ -198,7 +197,7 @@ module Render
 
           film_id = UUID.generate
           films_response = [film_id]
-          films_schema.should_receive(:render!).and_yield(films_response).and_return({ films: films_response })
+          films.schema.stub({ render!: films_response })
 
           response = films.render!
           response.film.should be_a(Array)

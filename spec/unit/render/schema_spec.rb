@@ -18,16 +18,17 @@ module Render
         end
 
         it "is set to preloaded definition" do
-          definition_title = :preloaded_schema
-          definition = { title: definition_title, properties: { title: { type: String } } }
+          definition_id = :preloaded_schema
+          definition = { id: definition_id, properties: { title: { type: String } } }
           Definition.load!(definition)
-          Schema.new(definition_title).definition.should == definition
+
+          Schema.new(definition_id).definition.should == definition
         end
 
         it "raises an error if definition is not found and argument is not a schema" do
           expect {
             Schema.new(:does_not_exists)
-          }.to raise_error(Errors::DefinitionNotFound)
+          }.to raise_error(Errors::Definition::NotFound)
         end
       end
 
@@ -104,7 +105,7 @@ module Render
     describe "#render!" do
       before(:each) do
         Definition.load!({
-          title: :film,
+          id: :film,
           type: Object,
           properties: {
             genre: { type: String }
@@ -125,19 +126,6 @@ module Render
           schema = Schema.new(:film)
           schema.render!({ explicit: :value })
           schema.raw_data.should == { explicit: :value }
-        end
-
-        it "is yielded" do
-          Render.stub({ live: false })
-          schema = Schema.new(:film)
-
-          data = { explicit: :value }
-          schema.should_receive(:serialize!).with(data)
-          schema.serialized_data = :serialized_data
-
-          expect { |a_block|
-            schema.render!(data, &a_block)
-          }.to yield_with_args(:serialized_data)
         end
       end
 
@@ -175,20 +163,7 @@ module Render
           schema = Schema.new(:film)
           schema.hash_attributes.first.should_receive(:serialize).with(genre, anything).and_return({ genre: genre })
 
-          schema.render!(nil, endpoint).should == { film: data }
-        end
-
-        it "is serialized value nested under #universal_title" do
-          Render.stub({ live: false })
-          definition = {
-            title: :film,
-            universal_title: :imdb_films_show,
-            type: Object,
-            properties: {
-              genre: { type: String }
-            }
-          }
-          Schema.new(definition).render!.should have_key(:imdb_films_show)
+          schema.render!(nil, endpoint).should == data
         end
       end
 

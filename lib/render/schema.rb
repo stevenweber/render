@@ -14,10 +14,13 @@ module Render
       :definition,
       :array_attribute,
       :hash_attributes,
-      :universal_title,
       :raw_data,
       :serialized_data,
       :rendered_data
+
+    def universal_title
+      Definition.id(definition)
+    end
 
     def initialize(definition_or_title)
       Render.logger.debug("Loading #{definition_or_title}")
@@ -25,7 +28,6 @@ module Render
       title_or_default = definition.fetch(:title, DEFAULT_TITLE)
       self.title = title_or_default.to_sym
       self.type = Type.parse(definition[:type]) || Object
-      self.universal_title = definition.fetch(:universal_title, nil)
 
       if array_schema?
         self.array_attribute = ArrayAttribute.new(definition)
@@ -60,8 +62,7 @@ module Render
     def render!(explicit_data = nil, endpoint = nil)
       self.raw_data = Render.live ? request(endpoint) : explicit_data
       serialize!(raw_data)
-      yield serialized_data if block_given?
-      self.rendered_data = Extensions::DottableHash.new(hash_with_title_prefixes(serialized_data))
+      serialized_data.is_a?(Array) ? serialized_data : Extensions::DottableHash.new(serialized_data)
     end
 
     def attributes
@@ -79,14 +80,6 @@ module Render
         definition_or_title
       else
         Definition.find(definition_or_title)
-      end
-    end
-
-    def hash_with_title_prefixes(data)
-      if universal_title
-        { universal_title => { title => data } }
-      else
-        { title => data }
       end
     end
 

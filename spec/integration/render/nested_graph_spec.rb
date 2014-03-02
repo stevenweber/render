@@ -26,12 +26,10 @@ module Render
       response = graph.render!
 
       response.should == {
-        films_index: {
-          films: [{ id: @aquatic_id }, { id: @darjeeling_id }]
-        },
+        films_index: [{ id: @aquatic_id }, { id: @darjeeling_id }],
         films_show: [
-          { film: { name: @aquatic_name, year: nil } },
-          { film: { name: @darjeeling_name, year: nil } }
+          { name: @aquatic_name, year: nil },
+          { name: @darjeeling_name, year: nil }
         ]
       }
     end
@@ -57,8 +55,8 @@ module Render
       response.should == {
         films_as_array_of_archetypes: [@aquatic_id, @darjeeling_id],
         films_show: [
-          { film: { name: @aquatic_name, year: nil } },
-          { film: { name: @darjeeling_name, year: nil } }
+          { name: @aquatic_name, year: nil },
+          { name: @darjeeling_name, year: nil }
         ]
       }
     end

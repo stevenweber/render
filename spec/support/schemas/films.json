@@ -1,5 +1,5 @@
 {
-  "universal_title": "films_index",
+  "id": "films_index",
   "title": "films",
   "type": "array",
   "endpoint": "http://:host",

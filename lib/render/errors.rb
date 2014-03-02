@@ -40,15 +40,29 @@ module Render
       end
     end
 
-    class DefinitionNotFound < StandardError
-      attr_accessor :title
+    module Definition
+      class NoId < StandardError
+        attr_accessor :definition
 
-      def initialize(title)
-        self.title = title
+        def initialize(definition)
+          self.definition = definition
+        end
+
+        def to_s
+          "id keyword must be used to differentiate loaded schemas -- none found in: #{definition}"
+        end
       end
 
-      def to_s
-        "Schema with title #{title} is not loaded"
+      class NotFound < StandardError
+        attr_accessor :title
+
+        def initialize(title)
+          self.title = title
+        end
+
+        def to_s
+          "Schema with title #{title} is not loaded"
+        end
       end
     end
 
