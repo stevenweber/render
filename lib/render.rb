@@ -28,3 +28,5 @@ module Render
 
   end
 end
+
+require "render/json_schema"

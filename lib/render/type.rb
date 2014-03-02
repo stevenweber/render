@@ -22,8 +22,8 @@ module Render
       end
 
       def parse(name, raise_error = false)
+        return nil if (name.nil?)
         return name unless name.is_a?(String) || name.is_a?(Symbol)
-        return nil if (name == "null")
 
         Render::Type.find(name) || Object.const_get(name.capitalize)
       rescue NameError
@@ -35,7 +35,7 @@ module Render
       end
 
       def to(classes, value, enums = nil)
-        return nil if value.nil?
+        return nil if (value.nil? || classes.any?(&:nil?))
         return value if classes.any? { |klass| value.is_a?(klass) }
 
         case(classes.first.name)
@@ -87,7 +87,7 @@ module Render
 
     # Standard types
     add!(:number, Float)
-    add!(:null, nil)
+    add!(:null, NilClass)
     add_render_specific_type!(:Enum)
     add_render_specific_type!(:Boolean)
 

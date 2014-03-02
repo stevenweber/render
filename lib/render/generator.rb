@@ -112,7 +112,7 @@ module Render
     })
 
     Generator.create!(Type::Boolean, /.*/, proc { [true, false].sample })
-    Generator.create!(nil, /.*/, proc {}) # parsed from null
+    Generator.create!(NilClass, /.*/, proc {}) # parsed from null
     # Standard JSON formats
     Generator.create!(DateTime, /.*/, proc { DateTime.now.to_s })
     Generator.create!(URI, /.*/, proc { "http://localhost" })

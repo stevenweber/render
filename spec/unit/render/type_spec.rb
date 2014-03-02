@@ -32,7 +32,7 @@ module Render
         Type.parse!("object").should == Object
         Type.parse!("array").should == Array
         Type.parse!("boolean").should == Type::Boolean
-        Type.parse!("null").should == nil
+        Type.parse!("null").should == NilClass
       end
 
       it "returns ruby classes for standard json formats" do
@@ -104,6 +104,10 @@ module Render
     describe ".to" do
       it "maintains nil values" do
         Type.to([Float], nil).should == nil
+      end
+
+      it "returns nil for undefined classes" do
+        Type.to([nil], {}).should == nil
       end
 
       it "converts to floats" do
