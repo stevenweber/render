@@ -36,13 +36,17 @@ module Render
         self.hash_attributes = definition.fetch(:properties).collect do |name, attribute_definition|
           HashAttribute.new({ name => attribute_definition })
         end
-
-        definition.fetch(:required, []).each do |required_attribute|
-          attribute = attributes.detect { |attribute| attribute.name == required_attribute.to_sym }
-          raise Errors::Schema::InvalidRequire.new(required_attribute) unless attribute
-          attribute.required = true
-        end
+        require_attributes!
       end
+    end
+
+    def require_attributes!
+      definition.fetch(:required, []).each do |required_attribute|
+        attribute = attributes.detect { |attribute| attribute.name == required_attribute.to_sym }
+        attribute.required = true
+      end
+    rescue
+      raise Errors::Schema::InvalidRequire.new(definition)
     end
 
     def serialize!(explicit_data = nil)

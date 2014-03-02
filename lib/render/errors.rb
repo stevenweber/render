@@ -68,14 +68,15 @@ module Render
 
     class Schema
       class InvalidRequire < StandardError
-        attr_accessor :attribute_name
+        attr_accessor :schema_definition
 
-        def initialize(attribute_name)
-          self.attribute_name = attribute_name
+        def initialize(schema_definition)
+          self.schema_definition = schema_definition
         end
 
         def to_s
-          "Could not require #{attribute_name} becuase it's not defined in the schema."
+          required_attributes = schema_definition.fetch(:required, [])
+          "Could not require the following attributes: #{required_attributes}. This should be an array of attributes for #{schema_definition}"
         end
       end
 
