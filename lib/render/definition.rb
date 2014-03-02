@@ -9,8 +9,7 @@ module Render
         Dir.glob("#{directory}/**/*.json").each do |definition_file|
           Render.logger.info("Reading #{definition_file} definition")
           definition_string = File.read(definition_file)
-          json_definition = JSON.parse(definition_string)
-          parsed_definition = Extensions::DottableHash.new(json_definition).recursively_symbolize_keys!
+          parsed_definition = JSON.parse(definition_string, { symbolize_names: true })
           load!(parsed_definition)
         end
       end

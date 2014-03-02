@@ -24,7 +24,8 @@ module Render
 
     def initialize(definition_or_title)
       Render.logger.debug("Loading #{definition_or_title}")
-      self.definition = determine_definition(definition_or_title)
+
+      process_definition!(definition_or_title)
       title_or_default = definition.fetch(:title, DEFAULT_TITLE)
       self.title = title_or_default.to_sym
       self.type = Type.parse(definition[:type]) || Object
@@ -70,6 +71,26 @@ module Render
     end
 
     private
+
+    def process_definition!(title_or_definition)
+      raw_definition = determine_definition(title_or_definition)
+
+      if container?(raw_definition)
+        self.definition = raw_definition
+      else
+        partitions = raw_definition.partition { |(key, value)| container?(value) }
+        subschemas, container = partitions.map { |partition| Hash[partition] }
+        container[:type] = Object
+        container[:properties] = subschemas
+
+        self.definition = container
+      end
+    end
+
+    def container?(definition)
+      return false unless definition.is_a?(Hash)
+      definition.has_key?(:type) || definition.has_key?(:properties)
+    end
 
     def array_schema?
       definition.keys.include?(:items)

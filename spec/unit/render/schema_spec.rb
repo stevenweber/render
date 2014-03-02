@@ -30,6 +30,29 @@ module Render
             Schema.new(:does_not_exists)
           }.to raise_error(Errors::Definition::NotFound)
         end
+
+        # I daresay it's rather hacky for someone to define schemas without a container
+        # Don't count on this support in the future
+        describe "non-container definitions" do
+          it "creates Object container for subschemas" do
+            non_container_definition = {
+              students: { type: Array, items: { type: String } },
+              teacher: { type: Object, properties: { name: { type: String } } }
+            }
+
+            converted_definition = {
+              type: Object,
+              properties: {
+                students: { type: Array, items: { type: String } },
+                teacher: { type: Object, properties: { name:  { type: String } } }
+              }
+            }
+
+            non_container_schema = Schema.new(non_container_definition)
+            converted_schema = Schema.new(converted_definition)
+            non_container_schema.definition.should == converted_schema.definition
+          end
+        end
       end
 
       it "sets its type from schema" do
