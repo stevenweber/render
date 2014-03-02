@@ -19,12 +19,11 @@ Check out examples as part of the [integration tests](spec/integration/render).
 ```ruby
 # Make requests
 Render::Definition.load_from_directory!("/path/to/json/schema/dir")
-Render::Graph.new(:universal_title, { host: "films.local" }).render!
+Render::Graph.new("loaded-schema-id", { host: "films.local" }).render!
 
 # Or mock data
 Render.live = false
-schema = {
-  title: :person,
+planned_schema = {
   type: :object,
   properties: {
     name: { type: :string, minLength: 1 },
@@ -46,7 +45,7 @@ schema = {
   }
 }
 
-Render::Schema.new(schema).render!
+mock_data = Render::Schema.new(planned_schema).render!
 # => {
 #   :person=> {
 #     :name => "name (generated)",
@@ -63,9 +62,7 @@ Render::Schema.new(schema).render!
 
 ## Caveats/Notes/Assumptions
 
-- Assumes additionalProperties is always false
-  - It would be impossible to model reponses otherwise
-  - Additional response data does not affect what's been defined
+- Assumes additionalProperties is always false because unknown properties cannot be modeled
 
 Render is not meant to be a validator. As such, it does not care about:
 
@@ -79,16 +76,14 @@ It will however,
 ## Roadmap
 
 - Use [URI Template variable expansion]("http://tools.ietf.org/html/rfc6570") instead of symbols
-- Enhanced nesting
-  - Leveraging $ref for nesting
-    - Switch from universalTitle to id (and corresponding helper changes, e.g. Schema.new(:title))
-  - Relationship calculation between nested Graphs
-- The following keyword implementations:
+- $ref implementation from loaded schemas
+- Expanded keyword implementations:
   - pattern/patternProperties
   - Tuples of varying types, e.g. [3, { name: "bob" }]
 - Relating to requests
   - Custom options, e.g. headers, timeouts
   - Drop-in custom requesting
+- Enhanced relationship calculation between nested Graphs
 
 ## Contributing
 
