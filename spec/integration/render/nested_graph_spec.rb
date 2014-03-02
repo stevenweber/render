@@ -34,13 +34,13 @@ module Render
       }
     end
 
-    it "makes subsequent calls from archetype array data" do
+    it "makes subsequent calls from simple array data" do
       stub_request(:get, "http://films.local").to_return({ body: [@aquatic_id, @darjeeling_id].to_json })
       stub_request(:get, "http://films.local/films/#{@aquatic_id}").to_return({ body: { name: @aquatic_name }.to_json })
       stub_request(:get, "http://films.local/films/#{@darjeeling_id}").to_return({ body: { name: @darjeeling_name }.to_json })
 
       schema = Render::Schema.new({
-        title: :films_as_array_of_archetypes,
+        title: :films_as_array_of_ids,
         type: Array,
         endpoint: "http://:host",
         items: {
@@ -53,7 +53,7 @@ module Render
       response = graph.render!
 
       response.should == {
-        films_as_array_of_archetypes: [@aquatic_id, @darjeeling_id],
+        films_as_array_of_ids: [@aquatic_id, @darjeeling_id],
         films_show: [
           { name: @aquatic_name, year: nil },
           { name: @darjeeling_name, year: nil }

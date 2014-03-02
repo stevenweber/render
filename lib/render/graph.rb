@@ -11,7 +11,6 @@ module Render
       :raw_endpoint,
       :relationships,
       :graphs,
-      :inherited_data,
       :config,
       :rendered_data,
       :relationship_info
@@ -23,21 +22,10 @@ module Render
       self.raw_endpoint = (options.delete(:endpoint) || schema.definition[:endpoint]).to_s
       self.config = options
       self.relationship_info = {}
-
-      self.inherited_data = {}
     end
 
     def title
-      schema.universal_title || schema.title
-    end
-
-    def process_relationship_info!(data)
-      return if !data
-
-      self.relationship_info = relationships.inject({}) do |info, (parent_key, child_key)|
-        value = data.is_a?(Hash) ? data.fetch(parent_key, nil) : data
-        info.merge!({ child_key => value })
-      end
+      schema.id || schema.title
     end
 
     def serialize!(explicit_data = nil, parental_data = nil)
@@ -72,6 +60,15 @@ module Render
     end
 
     private
+
+    def process_relationship_info!(data)
+      return if !data
+
+      self.relationship_info = relationships.inject({}) do |info, (parent_key, child_key)|
+        value = data.is_a?(Hash) ? data.fetch(parent_key, nil) : data
+        info.merge!({ child_key => value })
+      end
+    end
 
     def endpoint
       raw_endpoint.gsub!(":host", config.fetch(:host)) if raw_endpoint.match(":host")

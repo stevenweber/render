@@ -183,7 +183,7 @@ module Render
           film.render!.director.id.should == @director_id
         end
 
-        it "uses archetype parental data" do
+        it "uses simple parental data" do
           films_schema = Schema.new({
             title: "films",
             type: Array,

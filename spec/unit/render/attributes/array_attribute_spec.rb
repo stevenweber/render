@@ -18,37 +18,37 @@ module Render
       end
     end
 
-    describe "archetype" do
-      it "returns only a value" do
-        id = UUID.generate
-        attribute = ArrayAttribute.new({ items: { type: UUID } })
-        attribute.serialize([id]).should == [id]
-      end
-    end
-
     describe "#serialize" do
-      it "returns value as defined type" do
-        attribute = ArrayAttribute.new({ items: { type: Float } })
-        attribute.serialize(["2.0"]).should == [2.0]
-      end
+      describe "simple" do
+        it "only returns a value" do
+          id = UUID.generate
+          attribute = ArrayAttribute.new({ items: { type: UUID } })
+          attribute.serialize([id]).should == [id]
+        end
 
-      it "returns faux value as defined type" do
-        Render.stub({ live: false })
+        it "returns value as defined type" do
+          attribute = ArrayAttribute.new({ items: { type: Float } })
+          attribute.serialize(["2.0"]).should == [2.0]
+        end
 
-        attribute = ArrayAttribute.new({ items: { type: Float }, maxItems: 1, minItems: 1 })
-        attribute.stub({ default_value: "2" })
+        it "returns faux value as defined type" do
+          Render.stub({ live: false })
 
-        attribute.serialize.should == [2.0]
-      end
+          attribute = ArrayAttribute.new({ items: { type: Float }, maxItems: 1, minItems: 1 })
+          attribute.stub({ default_value: "2" })
 
-      it "enforces uniqueness" do
-        attribute = ArrayAttribute.new({ items: { type: Integer }, uniqueItems: true })
-        attribute.serialize(["2.0", 2, "2"]).should == [2]
-      end
+          attribute.serialize.should == [2.0]
+        end
 
-      it "does not enforce uniqueness" do
-        attribute = ArrayAttribute.new({ items: { type: Integer } })
-        attribute.serialize(["2.0", 2, "2"]).should == [2, 2, 2]
+        it "enforces uniqueness" do
+          attribute = ArrayAttribute.new({ items: { type: Integer }, uniqueItems: true })
+          attribute.serialize(["2.0", 2, "2"]).should == [2]
+        end
+
+        it "does not enforce uniqueness" do
+          attribute = ArrayAttribute.new({ items: { type: Integer } })
+          attribute.serialize(["2.0", 2, "2"]).should == [2, 2, 2]
+        end
       end
     end
 

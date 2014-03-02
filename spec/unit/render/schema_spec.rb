@@ -68,16 +68,16 @@ module Render
 
       describe "#array_attribute" do
         it "is set for array schemas" do
-          archetype_schema = {
+          simple_schema = {
             type: Array,
             items: {
               type: String
             }
           }
 
-          attribute = Schema.new(archetype_schema).array_attribute
+          attribute = Schema.new(simple_schema).array_attribute
           attribute.types.should == [String]
-          attribute.archetype.should == true
+          attribute.simple.should == true
         end
       end
 
@@ -134,22 +134,6 @@ module Render
             genre: { type: String }
           }
         })
-      end
-
-      describe "#raw_data" do
-        it "is set from endpoint response" do
-          schema = Schema.new(:film)
-          schema.stub({ request: { response: :body } })
-          schema.render!
-          schema.raw_data.should == { response: :body }
-        end
-
-        it "is set to explicit_data when offline" do
-          Render.stub({ live: false })
-          schema = Schema.new(:film)
-          schema.render!({ explicit: :value })
-          schema.raw_data.should == { explicit: :value }
-        end
       end
 
       context "request" do

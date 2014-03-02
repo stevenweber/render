@@ -13,21 +13,13 @@ module Render
       :type,
       :definition,
       :array_attribute,
-      :hash_attributes,
-      :raw_data,
-      :serialized_data,
-      :rendered_data
-
-    def universal_title
-      Definition.id(definition)
-    end
+      :hash_attributes
 
     def initialize(definition_or_title)
       Render.logger.debug("Loading #{definition_or_title}")
 
       process_definition!(definition_or_title)
-      title_or_default = definition.fetch(:title, DEFAULT_TITLE)
-      self.title = title_or_default.to_sym
+      self.title = definition.fetch(:title, DEFAULT_TITLE)
       self.type = Type.parse(definition[:type]) || Object
 
       if array_schema?
@@ -40,6 +32,36 @@ module Render
       end
     end
 
+    def id
+      Definition.id(definition)
+    end
+
+    def serialize!(explicit_data = nil)
+      if (type == Array)
+        array_attribute.serialize(explicit_data)
+      else
+        hash_attributes.inject({}) do |processed_explicit_data, attribute|
+          explicit_data ||= {}
+          value = explicit_data.fetch(attribute.name, nil)
+          maintain_nil = explicit_data.has_key?(attribute.name)
+          serialized_attribute = attribute.serialize(value, maintain_nil)
+          processed_explicit_data.merge!(serialized_attribute)
+        end
+      end
+    end
+
+    def render!(explicit_data = nil, endpoint = nil)
+      raw_data = Render.live ? request(endpoint) : explicit_data
+      data = serialize!(raw_data)
+      data.is_a?(Array) ? data : Extensions::DottableHash.new(data)
+    end
+
+    def attributes
+      array_schema? ? array_attributes : hash_attributes
+    end
+
+    private
+
     def require_attributes!
       definition.fetch(:required, []).each do |required_attribute|
         attribute = attributes.detect { |attribute| attribute.name == required_attribute.to_sym }
@@ -48,33 +70,6 @@ module Render
     rescue
       raise Errors::Schema::InvalidRequire.new(definition)
     end
-
-    def serialize!(explicit_data = nil)
-      if (type == Array)
-        self.serialized_data = array_attribute.serialize(explicit_data)
-      else
-        self.serialized_data = hash_attributes.inject({}) do |processed_explicit_data, attribute|
-          explicit_data ||= {}
-          value = explicit_data.fetch(attribute.name, nil)
-          maintain_nil = explicit_data.has_key?(attribute.name)
-
-          serialized_attribute = attribute.serialize(value, maintain_nil)
-          processed_explicit_data.merge!(serialized_attribute)
-        end
-      end
-    end
-
-    def render!(explicit_data = nil, endpoint = nil)
-      self.raw_data = Render.live ? request(endpoint) : explicit_data
-      serialize!(raw_data)
-      serialized_data.is_a?(Array) ? serialized_data : Extensions::DottableHash.new(serialized_data)
-    end
-
-    def attributes
-      array_schema? ? array_attributes : hash_attributes
-    end
-
-    private
 
     def process_definition!(title_or_definition)
       raw_definition = determine_definition(title_or_definition)
@@ -115,12 +110,7 @@ module Render
     def default_request(endpoint)
       response = Net::HTTP.get_response(URI(endpoint))
       if response.kind_of?(Net::HTTPSuccess)
-        response = JSON.parse(response.body.to_s)
-        if response.is_a?(Array)
-          Extensions::SymbolizableArray.new(response).recursively_symbolize_keys!
-        else
-          Extensions::DottableHash.new(response).recursively_symbolize_keys!
-        end
+        JSON.parse(response.body.to_s, { symbolize_names: true })
       else
         raise Errors::Schema::RequestError.new(endpoint, response)
       end
