@@ -31,8 +31,7 @@ module Render
           }.to raise_error(Errors::Definition::NotFound)
         end
 
-        # I daresay it's rather hacky for someone to define schemas without a container
-        # Don't count on this support in the future
+        # This is probably not the best form
         describe "non-container definitions" do
           it "creates Object container for subschemas" do
             non_container_definition = {
