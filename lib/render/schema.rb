@@ -90,12 +90,29 @@ module Render
 
     def interpolate_refs!
       if array_schema?
-        ref = definition.fetch(:items).delete(:$ref)
-        return unless ref
-        referenced_definition = Definition.find(ref)
-        definition.fetch(:items).merge!(referenced_definition)
+        instance_definition = definition.fetch(:items)
+        interpolate_ref!(instance_definition)
       else
+        definition.fetch(:properties).each do |(instance_name, instance_definition)|
+          interpolate_ref!(instance_definition)
+        end
       end
+    end
+
+    def interpolate_ref!(instance_definition)
+      ref = instance_definition.delete(:$ref)
+      return unless ref
+      referenced_definition = (find_relative_definition(ref) || Definition.find(ref))
+      instance_definition.merge!(referenced_definition)
+    end
+
+    def find_relative_definition(ref)
+      paths = ref.split(/[#\/]/).delete_if { |path| path.empty? }
+      paths.reduce(definition) do |reduction, path|
+        reduction.fetch(path.to_sym)
+      end
+    rescue KeyError
+      nil
     end
 
     def container?(definition)

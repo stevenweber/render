@@ -66,7 +66,7 @@ mock_data = Render::Schema.new(planned_schema).render!
 
 Render is not meant to be a validator. As such, it does not care about:
 
-  - Keywords that do not strictly define schemas: `anyOf`, `allOf`, `oneOf`, `not`, `minProperties`, `maxProperties`, `dependencies`
+  - Keywords that do not strictly define schemas: `not`, `minProperties`, `maxProperties`, `dependencies`
   - Divergent responses, e.g. no errors will be raised if "abc" is returned for String with { "minLength": 4 }
 
 It will however,
@@ -75,14 +75,16 @@ It will however,
 
 ## Roadmap
 
-- $ref implementation from loaded schemas
+- `links` implementation as opposed to `endpoint`
 - Expanded keyword implementations:
+  - anyOf, allOf, oneOf
   - pattern/patternProperties
   - Tuples of varying types, e.g. [3, { name: "bob" }]
 - Relating to requests
   - Custom options, e.g. headers, timeouts
   - Drop-in custom requesting
 - Enhanced relationship calculation between nested Graphs
+- Enhanced $ref implementation
 
 ## Contributing
 
