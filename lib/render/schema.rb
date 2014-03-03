@@ -19,6 +19,8 @@ module Render
       Render.logger.debug("Loading #{definition_or_title}")
 
       process_definition!(definition_or_title)
+      interpolate_refs!
+
       self.title = definition.fetch(:title, DEFAULT_TITLE)
       self.type = Type.parse(definition[:type]) || Object
 
@@ -57,7 +59,7 @@ module Render
     end
 
     def attributes
-      array_schema? ? array_attributes : hash_attributes
+      array_schema? ? array_attribute : hash_attributes
     end
 
     private
@@ -83,6 +85,16 @@ module Render
         container[:properties] = subschemas
 
         self.definition = container
+      end
+    end
+
+    def interpolate_refs!
+      if array_schema?
+        ref = definition.fetch(:items).delete(:$ref)
+        return unless ref
+        referenced_definition = Definition.find(ref)
+        definition.fetch(:items).merge!(referenced_definition)
+      else
       end
     end
 

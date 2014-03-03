@@ -96,6 +96,50 @@ module Render
           schema.hash_attributes.any? { |a| a.name == :genre && a.types == [String] }.should == true
         end
       end
+
+      describe "$ref" do
+        before(:each) do
+          @original_instances = Definition.instances.dup
+        end
+
+        after(:each) do
+          Definition.instances = @original_instances
+        end
+
+        it "creates attributes from absolute references" do
+          topping_definition = {
+            id: "http://pizzas.local/schema#topping",
+            type: Object, properties: { name: { type: String } }
+          }
+          Definition.load!(topping_definition)
+
+          pizza_definition = {
+            type: Object,
+            properties: {
+              name: { type: String },
+              toppings: { type: Array, items: { :$ref => "http://pizzas.local/schema#topping" } }
+            }
+          }
+          pizza_schema = Schema.new(pizza_definition)
+
+          pizza_schema.definition.should == {
+            type: Object,
+            properties: {
+              name: { type: String },
+              toppings: {
+                type: Array,
+                items: {
+                  id: "http://pizzas.local/schema#topping",
+                  type: Object,
+                  properties: { name: { type: String } }
+                }
+              }
+            }
+          }
+        end
+
+        it "creates attributes from relative references"
+      end
     end
 
     describe "#serialize!" do
