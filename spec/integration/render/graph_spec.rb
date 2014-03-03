@@ -24,7 +24,7 @@ module Render
 
     it "request data from endpoint with explicit values" do
       director_1s_films_request = stub_request(:get, "http://films.local/directors/1/films").to_return({ body: "{}" })
-      @schema.merge!({ endpoint: "http://films.local/directors/:id/films" })
+      @schema.merge!({ endpoint: "http://films.local/directors/{id}/films" })
 
       response = Render::Graph.new(@schema, { id: 1 }).render!
       director_1s_films_request.should have_been_made.once
@@ -40,7 +40,7 @@ module Render
 
     it "interpolates variables into endpoint" do
       stub_request(:get, "http://films.local").to_return({ body: [{ id: 1 }].to_json })
-      @schema.merge!({ endpoint: "http://:host" })
+      @schema.merge!({ endpoint: "http://{host}" })
 
       response = Render::Graph.new(@schema, { host: "films.local" }).render!
       response.should == { films: [{ id: 1 }] }

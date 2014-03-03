@@ -42,7 +42,7 @@ module Render
       schema = Render::Schema.new({
         title: :films_as_array_of_ids,
         type: Array,
-        endpoint: "http://:host",
+        endpoint: "http://{host}",
         items: {
           type: UUID
         }

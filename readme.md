@@ -75,7 +75,6 @@ It will however,
 
 ## Roadmap
 
-- Use [URI Template variable expansion]("http://tools.ietf.org/html/rfc6570") instead of symbols
 - $ref implementation from loaded schemas
 - Expanded keyword implementations:
   - pattern/patternProperties

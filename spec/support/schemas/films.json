@@ -2,7 +2,7 @@
   "id": "films_index",
   "title": "films",
   "type": "array",
-  "endpoint": "http://:host",
+  "endpoint": "http://{host}",
   "items": {
     "title": "film",
     "type" : "object",

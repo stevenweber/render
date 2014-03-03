@@ -2,7 +2,7 @@
   "id": "films_show",
   "title": "film",
   "type": "object",
-  "endpoint": "http://:host/films/:id",
+  "endpoint": "http://{host}/films/{id}",
   "properties": {
     "name": { "type": "string" },
     "year": { "type": "integer" }

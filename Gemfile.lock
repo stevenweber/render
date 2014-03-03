@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     render (0.0.8)
+      addressable (= 2.3.5)
       macaddr (= 1.6.1)
       uuid (= 2.3.7)
 

@@ -1,12 +1,11 @@
+require "addressable/template"
+
 require "render/schema"
 require "render/errors"
 require "render/extensions/dottable_hash"
 
 module Render
   class Graph
-    PARAM = %r{:(?<param>[\w_]+)}
-    PARAMS = %r{#{PARAM}[\/\;\&]?}
-
     attr_accessor :schema,
       :raw_endpoint,
       :relationships,
@@ -61,6 +60,14 @@ module Render
 
     private
 
+    def endpoint
+      template = Addressable::Template.new(raw_endpoint)
+      variables = config.merge(relationship_info)
+      undefined_variables = (template.variables - variables.keys.collect(&:to_s))
+      raise Errors::Graph::EndpointKeyNotFound.new(undefined_variables) if (undefined_variables.size > 0)
+      template.expand(variables).to_s
+    end
+
     def process_relationship_info!(data)
       return if !data
 
@@ -68,33 +75,6 @@ module Render
         value = data.is_a?(Hash) ? data.fetch(parent_key, nil) : data
         info.merge!({ child_key => value })
       end
-    end
-
-    def endpoint
-      raw_endpoint.gsub!(":host", config.fetch(:host)) if raw_endpoint.match(":host")
-      uri = URI(raw_endpoint)
-
-      uri.path.gsub!(PARAMS) do |param|
-        key = param_key(param)
-        param.gsub(PARAM, param_value(key).to_s)
-      end
-
-      if uri.query
-        uri.query.gsub!(PARAMS) do |param|
-          key = param_key(param)
-          "#{key}=#{param_value(key)}&"
-        end.chop!
-      end
-
-      uri.to_s
-    end
-
-    def param_key(string)
-      string.match(PARAM)[:param].to_sym
-    end
-
-    def param_value(key)
-      relationship_info[key] || config[key] || raise(Errors::Graph::EndpointKeyNotFound.new(key))
     end
 
     def loop_with_configured_threading(elements)

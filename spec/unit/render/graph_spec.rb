@@ -49,16 +49,16 @@ module Render
       end
     end
 
-    describe ".send(:endpoint)" do
+    describe "#endpoint" do
       it "returns #raw_endpoint" do
         simple_endpoint = "http://endpoint.local"
         graph = Graph.new(@definition, { endpoint: simple_endpoint })
         graph.send(:endpoint).should == simple_endpoint
       end
 
-      it "interpolates inherited parameters" do
+      it "expands inherited variables" do
         director_id = UUID.generate
-        endpoint = "http://endpoint.local/directors/:id"
+        endpoint = "http://endpoint.local/directors/{id}"
         relationships = { director_id: :id }
 
         graph = Graph.new(@definition, { endpoint: endpoint, relationships: relationships })
@@ -69,14 +69,14 @@ module Render
 
       it "interpolates config options" do
         client_id = UUID.generate
-        endpoint = "http://endpoint.local/?:client_id"
+        endpoint = "http://endpoint.local/{?client_id}"
 
         graph = Graph.new(@definition, { endpoint: endpoint, client_id: client_id })
         graph.send(:endpoint).should == "http://endpoint.local/?client_id=#{client_id}"
       end
 
       it "raises an error if no value can be found" do
-        endpoint = "http://endpoint.com/?:undefined_key"
+        endpoint = "http://endpoint.com/{?undefined_key}"
         graph = Graph.new(@definition, { endpoint: endpoint })
 
         expect {
@@ -103,7 +103,7 @@ module Render
       end
 
       it "sends interpolated endpoint to its schema" do
-        endpoint = "http://endpoint.local/?:client_id"
+        endpoint = "http://endpoint.local/{?client_id}"
         client_id = UUID.generate
         graph = Graph.new(@definition, { endpoint: endpoint, client_id: client_id })
 
@@ -139,7 +139,7 @@ module Render
         it "uses parent data to calculate endpoint" do
           film = Graph.new(@film_schema)
           relationships = { director_id: :id }
-          endpoint = "http://endpoint.local/directors/:id"
+          endpoint = "http://endpoint.local/directors/{id}"
           film.graphs << Graph.new(@director_schema, { endpoint: endpoint, relationships: relationships })
 
           film_data = { director_id: @director_id }
