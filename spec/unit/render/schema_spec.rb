@@ -106,7 +106,7 @@ module Render
           Definition.instances = @original_instances
         end
 
-        it "creates subschemas from absolute references" do
+        it "creates subschemas for absolute references" do
           topping_definition = {
             id: "http://pizzas.local/schema#topping",
             type: Object, properties: { name: { type: String } }
@@ -138,7 +138,7 @@ module Render
           }
         end
 
-        it "creates subschemas from relative references from root" do
+        it "creates subschemas for relative references from root" do
           definition = {
             definitions: {
               address: {
@@ -157,6 +157,41 @@ module Render
             address: {
               type: Object,
               properties: { number: { type: Integer } }
+            }
+          }
+        end
+
+        it "creates nested subschemas for relative references from root" do
+          definition = {
+            definitions: {
+              address: {
+                type: Object,
+                properties: { number: { type: Integer } }
+              }
+            },
+            type: Object,
+            properties: {
+              primary_location: {
+                type: Object,
+                properties: {
+                  address: { :$ref => "#/definitions/address" }
+                }
+              }
+            }
+          }
+          schema = Schema.new(definition)
+
+          schema.definition[:properties].should == {
+            primary_location: {
+              type: Object,
+              properties: {
+                address: {
+                  type: Object,
+                  properties: {
+                    number: { type: Integer }
+                  }
+                }
+              }
             }
           }
         end

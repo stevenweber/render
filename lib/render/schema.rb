@@ -8,6 +8,7 @@ require "render/extensions/dottable_hash"
 module Render
   class Schema
     DEFAULT_TITLE = "untitled".freeze
+    CONTAINER_KEYWORDS = %w(items properties).freeze
 
     attr_accessor :title,
       :type,
@@ -19,7 +20,7 @@ module Render
       Render.logger.debug("Loading #{definition_or_title}")
 
       process_definition!(definition_or_title)
-      interpolate_refs!
+      interpolate_refs!(definition)
 
       self.title = definition.fetch(:title, DEFAULT_TITLE)
       self.type = Type.parse(definition[:type]) || Object
@@ -88,36 +89,39 @@ module Render
       end
     end
 
-    def interpolate_refs!
-      if array_schema?
-        instance_definition = definition.fetch(:items)
-        interpolate_ref!(instance_definition)
-      else
-        definition.fetch(:properties).each do |(instance_name, instance_definition)|
-          interpolate_ref!(instance_definition)
+    def interpolate_refs!(definition)
+      return unless definition.is_a?(Hash)
+
+      definition.each do |(instance_name, instance_value)|
+        next unless instance_value.is_a?(Hash)
+
+        ref_definition = find_ref(instance_value)
+        if ref_definition
+          interpolate_refs!(ref_definition)
+          instance_value.replace(ref_definition)
         end
+
+        interpolate_refs!(instance_value)
       end
     end
 
-    def interpolate_ref!(instance_definition)
-      ref = instance_definition.delete(:$ref)
+    def container?(definition)
+      return false unless definition.is_a?(Hash)
+      definition.any? { |(key, value)| CONTAINER_KEYWORDS.include?(key.to_s) }
+    end
+
+    def find_ref(definition)
+      ref = definition[:$ref]
       return unless ref
-      referenced_definition = (find_relative_definition(ref) || Definition.find(ref))
-      instance_definition.merge!(referenced_definition)
+      relative_definition = find_relative_definition(ref)
+      relative_definition.empty? ? Definition.find(ref) : relative_definition
     end
 
     def find_relative_definition(ref)
       paths = ref.split(/[#\/]/).delete_if { |path| path.empty? }
       paths.reduce(definition) do |reduction, path|
-        reduction.fetch(path.to_sym)
+        reduction.fetch(path.to_sym, {})
       end
-    rescue KeyError
-      nil
-    end
-
-    def container?(definition)
-      return false unless definition.is_a?(Hash)
-      definition.has_key?(:type) || definition.has_key?(:properties)
     end
 
     def array_schema?

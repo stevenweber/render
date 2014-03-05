@@ -1,8 +1,8 @@
 # Render
 
-Render improves the way you work with APIs.
+Render improves the way you work with APIs by dynamically modeling/requesting from [JSON Schemas](http://json-schema.org/) or Ruby equivalents thereof.
 
-* [Generate type-specific, dynamic API response data for testing](spec/integration/render/schema_spec.rb) with just a schema (JSON or Ruby)
+* [Generate type-specific, dynamic API response data for testing](spec/integration/render/schema_spec.rb) with just a schema
 * [Make API requests](spec/integration/render/graph_spec.rb) with a URL and a schema
 * Build Graphs that [interpret data from one endpoint to call others](spec/integration/render/nested_graph_spec.rb)
 
@@ -24,60 +24,58 @@ Render::Graph.new("loaded-schema-id", { host: "films.local" }).render!
 # Or mock data
 Render.live = false
 planned_schema = {
-  type: :object,
-  properties: {
-    name: { type: :string, minLength: 1 },
-    email: { type: :string, format: :email },
-    sex: { type: :string, enum: %w(MALE FEMALE) },
+  definitions: {
     address: {
-      type: :object,
+      type: Object,
       properties: {
-        number: { type: :integer },
-        street: { type: :string }
+        number: { type: Integer },
+        street: { type: String }
       }
-    },
+    }
+  },
+
+  type: Object,
+  properties: {
+    name: { type: String, minLength: 1 },
+    email: { type: String, format: :email },
+    sex: { type: String, enum: %w(MALE FEMALE) },
+    address: { :$ref => "#/definitions/address" },
     nicknames: {
-      type: :array,
+      type: Array,
       minItems: 1,
       maxItems: 1,
-      items: { type: :string }
+      items: { type: String }
     }
   }
 }
 
 mock_data = Render::Schema.new(planned_schema).render!
-# => {
-#   :person=> {
-#     :name => "name (generated)",
-#     :email => "you@localhost",
-#     :sex => "FEMALE",
-#     :address => {
-#       :number => 513948,
-#       :street => "street (generated)"
-#     },
-#     :nicknames => ["nicknames (generated)"]
-#   }
+# {
+#   :name => "name (generated)",
+#   :email => "you@localhost",
+#   :sex => "FEMALE",
+#   :address => {
+#     :number => 513948,
+#     :street => "street (generated)"
+#   },
+#   :nicknames => ["nicknames (generated)"]
 # }
 ```
 
 ## Caveats/Notes/Assumptions
 
-- Assumes additionalProperties is always false because unknown properties cannot be modeled
+Render is not meant to be a validator and ignores:
 
-Render is not meant to be a validator. As such, it does not care about:
-
-  - Keywords that do not strictly define schemas: `not`, `minProperties`, `maxProperties`, `dependencies`
+  - Keywords that do not additively define schemas: `not`, `minProperties`, `maxProperties`, `dependencies`
   - Divergent responses, e.g. no errors will be raised if "abc" is returned for String with { "minLength": 4 }
 
-It will however,
-
-  - Defensively type response values based on definition so you don't run into issues like ("2" > 1)
+It will help out, though, and defensively type response values based on definition (so you don't run into issues like `"2" > 1`).
 
 ## Roadmap
 
 - `links` implementation as opposed to `endpoint`
 - Expanded keyword implementations:
-  - anyOf, allOf, oneOf
+  - additionalProperties, anyOf, allOf, oneOf
   - pattern/patternProperties
   - Tuples of varying types, e.g. [3, { name: "bob" }]
 - Relating to requests
