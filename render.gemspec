@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "macaddr", "1.6.1" # required by UUID, 1.6.2 is bad github.com/ahoward/macaddr/issues/18
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake", "~> 10.1"
-  spec.add_development_dependency "debugger", "~> 1.6"
+  spec.add_development_dependency "debugger", "1.6.6"
   spec.add_development_dependency "rspec", "~> 2.14"
   spec.add_development_dependency "webmock", "~> 1.17"
   spec.add_development_dependency "yard", "~> 0.8"
