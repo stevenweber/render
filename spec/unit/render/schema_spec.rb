@@ -195,6 +195,58 @@ module Render
             }
           }
         end
+
+        it "interpolates closest relative definition" do
+          definition = {
+            definitions: { year: { type: :number } },
+            type: Object,
+            properties: {
+              book: {
+                definitions: { year: { type: Integer } },
+                type: Object,
+                properties: {
+                  year: { :$ref => "definitions/year" }
+                }
+              }
+            }
+          }
+
+          parsed_definition = Schema.new(definition).definition
+          year_schema = parsed_definition.fetch(:properties).fetch(:book).fetch(:properties).fetch(:year)
+          year_schema.fetch(:type).should == Integer
+        end
+
+        it "interpolates root-relative definition when specified" do
+          definition = {
+            definitions: { year: { type: :number } },
+            type: Object,
+            properties: {
+              book: {
+                definitions: { year: { type: Integer } },
+                type: Object,
+                properties: {
+                  year: { :$ref => "#/definitions/year" }
+                }
+              }
+            }
+          }
+
+          parsed_definition = Schema.new(definition).definition
+          parsed_definition.fetch(:properties).fetch(:book).fetch(:properties).fetch(:year).fetch(:type).should == :number
+        end
+
+        it "expands to empty schema if no ref is found" do
+          definition = {
+            type: Object,
+            properties: {
+              year_relative: { :$ref => "definitions/year" },
+              year_root: { :$ref => "#/definitions/year" }
+            }
+          }
+
+          Schema.new(definition).definition.fetch(:properties).fetch(:year_relative).should == {}
+          Schema.new(definition).definition.fetch(:properties).fetch(:year_root).should == {}
+        end
       end
     end
 

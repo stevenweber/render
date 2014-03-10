@@ -18,10 +18,10 @@ module Render
         self.instances[id(definition, true)] = definition
       end
 
-      def find(title)
+      def find(title, raise_error = true)
         instances.fetch(title.to_sym)
       rescue KeyError => error
-        raise Errors::Definition::NotFound.new(title)
+        raise Errors::Definition::NotFound.new(title) if raise_error
       end
 
       def id(definition, raise_error = false)

@@ -9,6 +9,8 @@ module Render
   class Schema
     DEFAULT_TITLE = "untitled".freeze
     CONTAINER_KEYWORDS = %w(items properties).freeze
+    ROOT_POINTER = "#".freeze
+    POINTER_SEPARATOR = %r{\/}.freeze
 
     attr_accessor :title,
       :type,
@@ -89,19 +91,40 @@ module Render
       end
     end
 
-    def interpolate_refs!(definition)
-      return unless definition.is_a?(Hash)
+    def interpolate_refs!(working_definition, current_scope = [])
+      return unless working_definition.is_a?(Hash)
 
-      definition.each do |(instance_name, instance_value)|
+      working_definition.each do |(instance_name, instance_value)|
         next unless instance_value.is_a?(Hash)
 
-        ref_definition = find_ref(instance_value)
-        if ref_definition
-          interpolate_refs!(ref_definition)
+        if instance_value.has_key?(:$ref)
+          ref = instance_value.fetch(:$ref)
+          ref_definition = Definition.find(ref, false) || find_local_schema(ref, current_scope)
           instance_value.replace(ref_definition)
         end
 
-        interpolate_refs!(instance_value)
+        interpolate_refs!(instance_value, current_scope.dup << instance_name)
+      end
+    end
+
+    def find_local_schema(ref, scopes)
+      paths = ref.split(POINTER_SEPARATOR)
+      if (paths.first == ROOT_POINTER)
+        paths.shift
+        find_at_path(paths) || {}
+      else
+        find_at_closest_scope(paths, scopes) || {}
+      end
+    end
+
+    def find_at_closest_scope(path, scopes)
+      return if scopes.empty?
+      find_at_path(scopes + path) || find_at_closest_scope(path, scopes[0...-1])
+    end
+
+    def find_at_path(paths)
+      paths.reduce(definition) do |reduction, path|
+        reduction[path.to_sym] || return
       end
     end
 
@@ -110,18 +133,17 @@ module Render
       definition.any? { |(key, value)| CONTAINER_KEYWORDS.include?(key.to_s) }
     end
 
-    def find_ref(definition)
-      ref = definition[:$ref]
-      return unless ref
-      relative_definition = find_relative_definition(ref)
-      relative_definition.empty? ? Definition.find(ref) : relative_definition
-    end
-
-    def find_relative_definition(ref)
-      paths = ref.split(/[#\/]/).delete_if { |path| path.empty? }
-      paths.reduce(definition) do |reduction, path|
-        reduction.fetch(path.to_sym, {})
+    def find_ref(definition, pointer_matcher = %r{.*})
+      ref = definition.fetch(:$ref)
+      ref.match(pointer_matcher) do |match_data|
+        paths = match_data.to_a.last.split(POINTER_SEPARATOR)
+        relative_definition = paths.reduce(definition) do |reduction, path|
+          reduction.fetch(path.to_sym, {})
+        end
+        return relative_definition unless relative_definition.empty?
       end
+
+      Definition.find(ref, false)
     end
 
     def array_schema?
