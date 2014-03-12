@@ -21,8 +21,8 @@ module Render
       stub_request(:get, "http://films.local/films/#{@aquatic_id}").to_return({ body: { name: @aquatic_name }.to_json })
       stub_request(:get, "http://films.local/films/#{@darjeeling_id}").to_return({ body: { name: @darjeeling_name }.to_json })
 
-      graph = Render::Graph.new(:films_index, { host: "films.local" })
-      graph.graphs << Render::Graph.new(:films_show, { host: "films.local", relationships: { id: :id } })
+      graph = Render::Graph.new("films_index", { host: "films.local" })
+      graph.graphs << Render::Graph.new("films_show", { host: "films.local", relationships: { id: :id } })
       response = graph.render!
 
       response.should == {
@@ -49,7 +49,7 @@ module Render
       })
 
       graph = Render::Graph.new(schema, { host: "films.local" })
-      graph.graphs << Render::Graph.new(:films_show, { host: "films.local", relationships: { id: :id } })
+      graph.graphs << Render::Graph.new("films_show", { host: "films.local", relationships: { id: :id } })
       response = graph.render!
 
       response.should == {

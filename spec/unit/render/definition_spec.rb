@@ -44,7 +44,7 @@ module Render
       it "accesses parsed schemas with symbols" do
         Definition.load_from_directory!(@directory)
         parsed_json = Render::Extensions::DottableHash.new(JSON.parse(@json_schema)).recursively_symbolize_keys!
-        Definition.instances[@schema_id.to_sym].should == parsed_json
+        Definition.instances[@schema_id].should == parsed_json
       end
     end
   end

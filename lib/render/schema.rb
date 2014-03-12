@@ -16,7 +16,8 @@ module Render
       :type,
       :definition,
       :array_attribute,
-      :hash_attributes
+      :hash_attributes,
+      :id
 
     def initialize(definition_or_title)
       Render.logger.debug("Loading #{definition_or_title}")
@@ -25,6 +26,7 @@ module Render
       interpolate_refs!(definition)
 
       self.title = definition.fetch(:title, DEFAULT_TITLE)
+      self.id = Definition.parse_id(definition)
       self.type = Type.parse(definition[:type]) || Object
 
       if array_schema?
@@ -37,16 +39,12 @@ module Render
       end
     end
 
-    def id
-      Definition.id(definition)
-    end
-
     def serialize!(explicit_data = nil)
       if (type == Array)
         array_attribute.serialize(explicit_data)
       else
+        explicit_data ||= {}
         hash_attributes.inject({}) do |processed_explicit_data, attribute|
-          explicit_data ||= {}
           value = explicit_data.fetch(attribute.name, nil)
           maintain_nil = explicit_data.has_key?(attribute.name)
           serialized_attribute = attribute.serialize(value, maintain_nil)
@@ -131,19 +129,6 @@ module Render
     def container?(definition)
       return false unless definition.is_a?(Hash)
       definition.any? { |(key, value)| CONTAINER_KEYWORDS.include?(key.to_s) }
-    end
-
-    def find_ref(definition, pointer_matcher = %r{.*})
-      ref = definition.fetch(:$ref)
-      ref.match(pointer_matcher) do |match_data|
-        paths = match_data.to_a.last.split(POINTER_SEPARATOR)
-        relative_definition = paths.reduce(definition) do |reduction, path|
-          reduction.fetch(path.to_sym, {})
-        end
-        return relative_definition unless relative_definition.empty?
-      end
-
-      Definition.find(ref, false)
     end
 
     def array_schema?

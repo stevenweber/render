@@ -116,7 +116,6 @@ module Render
           pizza_definition = {
             type: Object,
             properties: {
-              name: { type: String },
               toppings: { type: Array, items: { :$ref => "http://pizzas.local/schema#topping" } }
             }
           }
@@ -125,7 +124,6 @@ module Render
           pizza_schema.definition.should == {
             type: Object,
             properties: {
-              name: { type: String },
               toppings: {
                 type: Array,
                 items: {
