@@ -136,6 +136,31 @@ module Render
           }
         end
 
+        it "interpolates definitions from foreign schema" do
+          foreign_definition = {
+            id: "http://foreign.com/foo#",
+            type: Object,
+            properties: {
+              title: { type: String }
+            }
+          }
+          Definition.load!(foreign_definition)
+
+          definition = {
+            type: Object,
+            properties: {
+              :$ref => "http://foreign.com/foo#properties"
+            }
+          }
+          schema = Schema.new(definition)
+          schema.definition.should == {
+            type: Object,
+            properties: {
+              title: { type: String }
+            }
+          }
+        end
+
         it "creates subschemas for relative references from root" do
           definition = {
             definitions: {

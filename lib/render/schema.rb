@@ -97,12 +97,22 @@ module Render
 
         if instance_value.has_key?(:$ref)
           ref = instance_value.fetch(:$ref)
-          ref_definition = Definition.find(ref, false) || find_local_schema(ref, current_scope)
+          ref_definition = find_foreign_definition(ref)
+          ref_definition ||= find_local_schema(ref, current_scope)
           instance_value.replace(ref_definition)
         end
 
         interpolate_refs!(instance_value, current_scope.dup << instance_name)
       end
+    end
+
+    def find_foreign_definition(ref)
+      exact_match = Definition.find(ref, false)
+      return exact_match if !exact_match.nil?
+
+      foreign_root_path, foreign_root_scope = ref.split(ROOT_POINTER)
+      fuzzy_match = Definition.instances.detect { |id, definition| id.match(%r{^#{foreign_root_path}}) }
+      find_at_path(foreign_root_scope.split(POINTER_SEPARATOR), fuzzy_match[1]) if fuzzy_match
     end
 
     def find_local_schema(ref, scopes)
@@ -120,8 +130,8 @@ module Render
       find_at_path(scopes + path) || find_at_closest_scope(path, scopes[0...-1])
     end
 
-    def find_at_path(paths)
-      paths.reduce(definition) do |reduction, path|
+    def find_at_path(paths, working_definition = definition)
+      paths.reduce(working_definition) do |reduction, path|
         reduction[path.to_sym] || return
       end
     end
