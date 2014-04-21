@@ -66,7 +66,12 @@ module Render
     private
 
     def require_attributes!
-      definition.fetch(:required, []).each do |required_attribute|
+      return unless definition.has_key?(:required)
+
+      required_attributes = definition.fetch(:required)
+      return if [true, false].include?(required_attributes)
+
+      required_attributes.each do |required_attribute|
         attribute = attributes.detect { |attribute| attribute.name == required_attribute.to_sym }
         attribute.required = true
       end

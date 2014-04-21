@@ -80,6 +80,20 @@ module Render
         schema.attributes[0].required.should_not be
         schema.attributes[1].required.should be
       end
+
+      it "is silently ignores draft-3 boolean requires" do
+        draft_3_definition = {
+          type: Object,
+          required: true,
+          properties: {
+            title: { type: String }
+          }
+        }
+
+        expect {
+          Schema.new(draft_3_definition).render!
+        }.to_not raise_error
+      end
     end
   end
 end
