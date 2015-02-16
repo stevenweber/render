@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    render (0.1.0)
+    render (0.1.1)
       addressable
       macaddr (~> 1.7.1)
       uuid
