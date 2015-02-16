@@ -18,9 +18,10 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency "uuid", "2.3.7"
-  spec.add_runtime_dependency "addressable", "2.3.5"
-  spec.add_runtime_dependency "macaddr", "1.6.1" # required by UUID, 1.6.2 is bad github.com/ahoward/macaddr/issues/18
+  spec.add_runtime_dependency "uuid"
+  spec.add_runtime_dependency "addressable"
+  spec.add_runtime_dependency "macaddr", "~> 1.7.1"
+
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake", "~> 10.1"
   spec.add_development_dependency "debugger", "1.6.6"
