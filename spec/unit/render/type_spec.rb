@@ -22,6 +22,11 @@ module Render
       it "returns nil if no type is found" do
         Type.parse("not-a-type").should == nil
       end
+
+      it "parses union types" do
+        union_types = ["string", "null"]
+        expect(Type.parse(union_types)).to eq([String, NilClass])
+      end
     end
 
     describe ".parse!" do

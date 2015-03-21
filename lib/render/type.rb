@@ -22,6 +22,7 @@ module Render
       end
 
       def parse(name, raise_error = false)
+        return name.collect { |union_type| parse(union_type, raise_error) } if name.is_a?(Array)
         return nil if (name.nil?)
         return name unless name.is_a?(String) || name.is_a?(Symbol)
 
