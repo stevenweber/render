@@ -52,11 +52,37 @@ module Render
         schema = Schema.new(definition)
         schema.serialize!(films).should == films
       end
+
+      context "enums" do
+        before(:each) do
+          @genres = %w(horror comedy romcom)
+          @definition = {
+            title: "films",
+            type: Object,
+            properties: {
+              genre: {
+                enum: @genres
+              }
+            }
+          }
+        end
+
+        it "returns enum value" do
+          film = { genre: @genres.sample }
+          schema = Schema.new(@definition)
+          schema.serialize!(film).should == film
+        end
+
+        it "does not validate enum value" do
+          film = { genre: "not-defined-genre" }
+          schema = Schema.new(@definition)
+          schema.serialize!(film).should == film
+        end
+      end
     end
 
     describe "required" do
-      # Not defined in spec, but should have been
-      it "is set with HashAttribute-level keyword" do
+      it "can be set with draft-3 HashAttribute-level keyword" do
         schema = Schema.new({
           type: Object,
           properties: {

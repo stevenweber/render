@@ -128,14 +128,8 @@ module Render
       end
 
       describe "enum" do
-        it "returns valid enum" do
-          enums = [:foo, :bar]
-          Type.to([Type::Enum], :foo, enums).should == :foo
-        end
-
-        it "return nil for invalid enums" do
-          enums = [:foo]
-          Type.to([Type::Enum], :bar, enums).should == nil
+        it "returns enum regardless of validity" do
+          Type.to([Type::Enum], :foo).should == :foo
         end
       end
 

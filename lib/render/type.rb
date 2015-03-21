@@ -35,7 +35,7 @@ module Render
         parse(name, true)
       end
 
-      def to(classes, value, enums = nil)
+      def to(classes, value)
         return nil if (value.nil? || classes.any?(&:nil?))
         return value if classes.any? { |klass| value.is_a?(klass) }
 
@@ -49,8 +49,6 @@ module Render
         when Boolean.name
           return true if (value == true || value == "true")
           return false if (value == false || value == "false")
-        when Enum.name
-          (enums & [value]).first
         else
           value
         end

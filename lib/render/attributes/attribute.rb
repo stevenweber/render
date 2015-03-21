@@ -43,7 +43,7 @@ module Render
 
       if (options[:enum])
         self.enums = options[:enum]
-        self.format = Type::Enum
+        self.types = [Type::Enum]
       end
 
       @default = options[:default]

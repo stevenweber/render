@@ -65,7 +65,7 @@ module Render
       context "enums" do
         it "sets enum values" do
           enum_values = ["foo", "bar", "baz"]
-          attribute = HashAttribute.new({ key: { type: String, enum: enum_values } })
+          attribute = HashAttribute.new({ key: { enum: enum_values } })
           attribute.enums.should == enum_values
         end
       end
