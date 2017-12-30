@@ -138,7 +138,7 @@ module Render
           end
 
           value = HashAttribute.new({ key: { type: UUID } }).default_value
-          UUID.validate(value).should be_true
+          UUID.validate(value).should eq(true)
         end
 
         it "generates value from enum" do

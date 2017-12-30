@@ -80,7 +80,7 @@ module Render
       }
 
       response = Render::Schema.new(schema).serialize!
-      UUID.validate(response[:id]).should be_true
+      UUID.validate(response[:id]).should eq(true)
       response[:title].should be_a(String)
       response[:director][:rating].should be_a(Float)
       %w(horror action sci-fi).should include(response[:genre])

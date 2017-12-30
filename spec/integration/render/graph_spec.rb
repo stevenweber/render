@@ -89,7 +89,7 @@ module Render
         }
 
         response = Render::Graph.new(schema).render!
-        UUID.validate(response.film.id).should be_true
+        UUID.validate(response.film.id).should eq(true)
         response.film.title.should be_a(String)
         response.film.director.name.should be_a(String)
         response.film.director.rating.should be_a(Float)

@@ -3,7 +3,7 @@ require "render"
 describe Render do
   # Just give me this one existential thought to commemerate Prague.
   it "exists" do
-    Render.should be_true
+    Render.should be_truthy
   end
 
   describe "configuration" do

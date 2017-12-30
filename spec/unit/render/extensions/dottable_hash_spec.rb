@@ -20,14 +20,14 @@ module Render
 
         it "converts all keys to symbols" do
           dottable_hash = DottableHash.new({ "foo" => { "bar" => "baz" } })
-          dottable_hash.keys.include?(:foo).should be_true
+          dottable_hash.keys.include?(:foo).should eq(true)
         end
       end
 
       describe "#[]" do
         it "converts keys to strings" do
           @dottable_hash[:foo] = "bar"
-          @dottable_hash.keys.include?(:foo).should be_true
+          @dottable_hash.keys.include?(:foo).should eq(true)
         end
 
         it "converts hash values to dottable_hashs" do
